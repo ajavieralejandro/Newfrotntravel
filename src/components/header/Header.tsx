@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Box, useTheme, useMediaQuery } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useHeader, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
-import LogAgencia from "../../assets/logo-1-Color.png";
+import LogAgencia from "../../assets/Logo-1-Color.png";
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
