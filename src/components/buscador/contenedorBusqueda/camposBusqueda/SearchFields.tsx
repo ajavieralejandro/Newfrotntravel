@@ -15,10 +15,10 @@ const SearchInputs: React.FC = () => {
       <Box sx={{ backgroundColor: "transparent", p: { xs: 1, sm: 2, md: 2 }, borderRadius: "6px" }}>
         <Grid container spacing={{ xs: 1, sm: 2, md: 12 }} alignItems="left" justifyContent="space-between">
           <Grid item xs={12} sm={6} md={3} sx={{ minWidth: "220px" }}>
-            <CampoBusqueda label="Ciudad de Salida" />
+            <CampoBusqueda label="salida" />
           </Grid>
           <Grid item xs={12} sm={6} md={3} sx={{ minWidth: "220px" }}>
-            <CampoBusqueda label="Ciudad de Destino" />
+            <CampoBusqueda label="destino" />
           </Grid>
           <Grid item xs={12} sm={6} md={3} sx={{ minWidth: "220px" }}>
             <CampoFecha label="Fecha de Salida" />
