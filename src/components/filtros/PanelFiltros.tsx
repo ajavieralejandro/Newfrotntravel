@@ -31,7 +31,7 @@ const PanelFiltros = () => {
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
-        maxWidth: "900px",
+        maxWidth: "98%",
         p: { xs: 0.5, sm: 1, md: 2 },
         mx: "auto",
         my: 0,

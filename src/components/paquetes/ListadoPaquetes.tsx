@@ -79,8 +79,8 @@ const ListadoPaquetes: React.FC<ListadoPaquetesProps> = ({ paquetes: paquetesPro
             {listaFinal.slice(0, cantidadVisible).map((paquete, index) => (
               <Grid
                 item
-                xs={11}
-                sm={11}
+                xs={12}
+                sm={12}
                 md={12}
                 key={paquete.id}
                 sx={{ display: "flex", justifyContent: "left", mb: index !== listaFinal.length - 1 ? { xs: 2, sm: 3, md: 3 } : 0 }}

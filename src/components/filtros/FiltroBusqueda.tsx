@@ -40,7 +40,7 @@ const FiltroBusqueda = () => {
     <Box
       sx={{
         backgroundColor: colorFondo,
-        padding: { xs: 1, sm: 1.5, md: 2 },
+        padding: { xs: 0.5, sm: 1.5, md: 2 },
         borderRadius: "6px",
         width: "100%",
         maxWidth: "100%",
