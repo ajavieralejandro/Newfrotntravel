@@ -13,7 +13,6 @@ const Footer: FunctionComponent = () => {
 
   const fondoColor =
     footer?.color?.terciario || datosGenerales?.color?.terciario || "rgba(0, 0, 0, 0.7)";
-  //const logo = datosGenerales?.logoAgencia || null; si el logo se pasa por datosgenerales descomentar esta linea y sacarla siguiente
   const logo = LogAgencia;
   const currentYear = new Date().getFullYear();
 
@@ -24,42 +23,46 @@ const Footer: FunctionComponent = () => {
         backgroundColor: fondoColor,
         width: "100%",
         py: { xs: 4, sm: 5, md: 6 },
-        px: { xs: 2, sm: 4, md: 6 }, // Consistente con Header: 16px mobile, 32px tablet, 48px desktop
+        px: { xs: 2, sm: 4, md: 6 },
         boxSizing: "border-box",
       }}
     >
-      <Box sx={{ 
-        width: "100%",
-        maxWidth: { md: 1200, lg: 1400 }, // Opcional: un ancho máximo para desktop
-        margin: '0 auto' // Centrado en desktop si usas maxWidth
-      }}>
-        {/* Sección superior */}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { md: 1200, lg: 1400 },
+          margin: "0 auto",
+        }}
+      >
+        {/* 🟢 Sección superior */}
         <Grid
           container
-          spacing={{ xs: 1, sm: 2, md: 3 }} // Espaciado consistente: 8px mobile, 16px tablet, 24px desktop
+          spacing={{ xs: 1, sm: 2, md: 3 }}
           sx={{ width: "100%", margin: 0 }}
           alignItems="flex-start"
         >
+          {/* Izquierda más ancha */}
           <Grid
             item
             xs={12}
-            md={6}
+            md={7} // 👈 más ancho
             sx={{
               order: { xs: 2, md: 1 },
-              paddingLeft: { xs: 0, md: 'inherit' } // Elimina padding extra en mobile
+              paddingLeft: { xs: 0, md: "inherit" },
             }}
           >
             <IzquierdaArriba logo={logo} />
           </Grid>
 
+          {/* Derecha más angosta */}
           <Grid
             item
             xs={12}
-            md={6}
+            md={5} // 👈 más angosto
             sx={{
-              textAlign: { xs: "left", md: "right" }, // Alineación izquierda en mobile
+              textAlign: { xs: "left", md: "right" },
               order: { xs: 3, md: 2 },
-              paddingRight: { xs: 0, md: 'inherit' } // Elimina padding extra en mobile
+              paddingRight: { xs: 0, md: "inherit" },
             }}
           >
             <DerechaArriba />
@@ -72,11 +75,11 @@ const Footer: FunctionComponent = () => {
             my: { xs: 3, md: 4 },
             backgroundColor: "currentColor",
             opacity: 0.5,
-            mx: { xs: -2, md: 0 } // Compensa el padding container en mobile
+            mx: { xs: -2, md: 0 },
           }}
         />
 
-        {/* Sección inferior */}
+        {/* 🟡 Sección inferior */}
         <Grid
           container
           spacing={{ xs: 1, sm: 2, md: 3 }}
@@ -89,7 +92,7 @@ const Footer: FunctionComponent = () => {
             md={6}
             sx={{
               order: { xs: 4, md: 1 },
-              paddingLeft: { xs: 0, md: 'inherit' }
+              paddingLeft: { xs: 0, md: "inherit" },
             }}
           >
             <IzquierdaAbajo year={currentYear} />
@@ -102,7 +105,7 @@ const Footer: FunctionComponent = () => {
             sx={{
               textAlign: { xs: "left", md: "right" },
               order: { xs: 1, md: 2 },
-              paddingRight: { xs: 0, md: 'inherit' }
+              paddingRight: { xs: 0, md: "inherit" },
             }}
           >
             <DerechaAbajo />

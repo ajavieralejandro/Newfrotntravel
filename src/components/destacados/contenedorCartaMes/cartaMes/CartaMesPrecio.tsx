@@ -23,6 +23,22 @@ interface CartaMesPrecioProps {
   wp: PaqueteData
 }
 
+const normalizeCurrencyCode = (c?: string): string => {
+  if (!c) return "ARS";
+  const raw = c.trim();
+  const upper = raw.toUpperCase();
+
+  // Variantes comunes de "peso" → ARS
+  const pesoHints = ["PESO", "PESOS", "Peso", "ARS"];
+  const pesoSymbols = ["ARS$", "$", "AR$", "ARG$", "$ARS", "ARS $"];
+
+  if (pesoHints.some((h) => upper.includes(h))) return "ARS";
+  if (pesoSymbols.includes(upper)) return "ARS";
+
+  // Si viene ya como código, lo dejamos en mayúsculas
+  return upper;
+};
+
 const CartaMesPrecio: React.FC<CartaMesPrecioProps> = ({ precio, moneda, wp }) => {
   const datosGenerales = useDatosGenerales();
   const tarjetas = useTarjetas();
@@ -39,7 +55,7 @@ const CartaMesPrecio: React.FC<CartaMesPrecioProps> = ({ precio, moneda, wp }) =
 
   const textoContraste = getContrastingColor(colorPrimario);
 
-  const codigoMoneda = moneda?.trim().toUpperCase() || "";
+  const codigoMoneda = normalizeCurrencyCode(moneda);
   const mostrarConsultar = !precio || precio === 0;
 
   return (

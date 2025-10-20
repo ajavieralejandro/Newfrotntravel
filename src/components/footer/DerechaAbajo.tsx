@@ -1,82 +1,68 @@
-import { FunctionComponent, useCallback } from "react";
+import { FunctionComponent, useCallback, useState } from "react";
 import { Stack, Button, Box } from "@mui/material";
 import { useFooter, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
-
-type MenuItem =
-  | { type: "download"; label: string; href: string; disabled?: boolean }
-  | { type: "link"; label: string; href: string; disabled?: boolean; external?: boolean };
+import BotonArrepentimientoModal, { FormData } from "./BotonArrepentimientoModal";
 
 const DerechaAbajo: FunctionComponent = () => {
   const footer = useFooter();
   const datosGenerales = useDatosGenerales();
+  const [openModal, setOpenModal] = useState(false);
 
-  const tipografia =
-    footer?.tipografia || datosGenerales?.tipografiaAgencia || "inherit";
-  const textoColor =
-    footer?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#FFFFFF";
-  const colorHover =
-    footer?.color?.secundario || datosGenerales?.color?.secundario;
+  const tipografia = footer?.tipografia || datosGenerales?.tipografiaAgencia || "inherit";
+  const textoColor = "#9A9898"//footer?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#FFFFFF";
+  const colorHover = "#DBDBDC" //footer?.color?.secundario || datosGenerales?.color?.secundario;
 
-  const terminosUrl: string =
-    datosGenerales?.terminosYCondiciones && datosGenerales.terminosYCondiciones !== "#"
-      ? datosGenerales.terminosYCondiciones
-      : ""; // si no hay URL real, queda vacío
+  // 📨 función para enviar email
+  const enviarCorreo = useCallback(async (data: FormData) => {
+    //const agenciaEmail = datosGenerales?.emailAgencia || "agencia@ejemplo.com";
 
-  const getFileNameFromUrl = (url: string) => {
+    const agenciaEmail = "agencia@ejemplo.com";
+    const body = `
+      Nombre: ${data.nombre}
+      Apellido: ${data.apellido}
+      Móvil: ${data.movil}
+      Email: ${data.email}
+      Producto: ${data.producto}
+      Cantidad de pasajeros: ${data.cantidad}
+      Fecha de compra: ${data.fechaCompra}
+      Destino: ${data.destino}
+      Motivo: ${data.motivo}
+
+      Envío estas líneas para solicitar el desistimiento de mi compra online dentro de las 24 hs de haberla adquirida.
+    `;
+
     try {
-      const u = new URL(url);
-      const last = u.pathname.split("/").filter(Boolean).pop();
-      if (last && last.includes(".")) return last;
-    } catch {
-      // ignore
-    }
-    return "terminos-y-condiciones.pdf";
-  };
+      await fetch("/api/enviar-arrepentimiento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: [agenciaEmail, data.email],
+          subject: "Solicitud de desistimiento de compra",
+          message: body,
+        }),
+      });
 
-  const descargarArchivo = useCallback(async (url: string) => {
-    try {
-      const resp = await fetch(url, { mode: "cors" });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const blob = await resp.blob();
-      const href = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = href;
-      a.download = getFileNameFromUrl(url);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(href);
-    } catch {
-      // Fallback: abrir en nueva pestaña si no se pudo descargar
-      window.open(url, "_blank", "noopener,noreferrer");
+      alert("Tu solicitud fue enviada con éxito. Te llegará una copia al correo indicado.");
+    } catch (e) {
+      alert("Ocurrió un error al enviar la solicitud.");
     }
-  }, []);
+  }, [datosGenerales]);
 
-  const menuItems: MenuItem[] = [
+  const menuItems = [
     {
-      type: "download",
       label: "Condiciones Generales",
-      href: terminosUrl, // se maneja por onClick
-      disabled: !terminosUrl, // deshabilita si no hay URL real
+      type: "download",
+      onClick: () => window.open(datosGenerales?.terminosYCondiciones || "#", "_blank"),
     },
     {
-      type: "link",
       label: "Botón de Arrepentimiento",
-      href: "#",            // reemplazar por URL real
-      external: true,       // si luego apuntas a una URL real externa
-      disabled: true,       // por ahora deshabilitado
+      type: "modal",
+      onClick: () => setOpenModal(true),
     },
   ];
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "transparent",
-        py: { xs: 1, sm: 2 },
-        px: { xs: 1, sm: 2, md: 0 },
-        width: "100%",
-      }}
-    >
+    <Box sx={{ backgroundColor: "transparent", py: { xs: 1, sm: 2 }, px: { xs: 1, sm: 2, md: 0 }, width: "100%" }}>
       <Stack
         direction={{ xs: "column", sm: "column", md: "row" }}
         spacing={{ xs: 1, sm: 1.5, md: 2 }}
@@ -85,65 +71,31 @@ const DerechaAbajo: FunctionComponent = () => {
         textAlign="center"
         width="100%"
       >
-        {menuItems.map((item, index) => {
-          if (item.type === "download") {
-            return (
-              <Button
-                key={index}
-                variant="text"
-                onClick={() => descargarArchivo(item.href)}
-                disabled={!!item.disabled}
-                sx={{
-                  color: textoColor,
-                  fontSize: { xs: "0.72rem", sm: "0.78rem", md: "0.82rem" },
-                  fontFamily: tipografia,
-                  textTransform: "none",
-                  padding: "4px 8px",
-                  minWidth: "auto",
-                  maxWidth: { xs: "100%", md: "220px" },
-                  width: { xs: "100%", md: "auto" },
-                  whiteSpace: "nowrap",
-                  "&:hover": {
-                    color: colorHover,
-                  },
-                }}
-              >
-                {item.label}
-              </Button>
-            );
-          }
-
-          // LINK
-          const hasRealHref = item.href && item.href !== "#";
-          return (
-            <Button
-              key={index}
-              variant="text"
-              component="a"
-              href={item.href} // siempre string
-              target={hasRealHref && item.external ? "_blank" : undefined}
-              rel={hasRealHref && item.external ? "noopener noreferrer" : undefined}
-              disabled={!!item.disabled || !hasRealHref}
-              sx={{
-                color: textoColor,
-                fontSize: { xs: "0.72rem", sm: "0.78rem", md: "0.82rem" },
-                fontFamily: tipografia,
-                textTransform: "none",
-                padding: "4px 8px",
-                minWidth: "auto",
-                maxWidth: { xs: "100%", md: "220px" },
-                width: { xs: "100%", md: "auto" },
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  color: colorHover,
-                },
-              }}
-            >
-              {item.label}
-            </Button>
-          );
-        })}
+        {menuItems.map((item, i) => (
+          <Button
+            key={i}
+            variant="text"
+            onClick={item.onClick}
+            sx={{
+              color: textoColor,
+              fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.85rem" },
+              fontFamily: tipografia,
+              textTransform: "none",
+              padding: "4px 8px",
+              "&:hover": { color: colorHover },
+            }}
+          >
+            {item.label}
+          </Button>
+        ))}
       </Stack>
+
+      {/* Modal */}
+      <BotonArrepentimientoModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onSubmit={enviarCorreo}
+      />
     </Box>
   );
 };
