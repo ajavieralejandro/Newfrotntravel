@@ -37,7 +37,7 @@ export const crearReserva = async (payload: ReservaPayload) => {
     const res = await fetch("https://travelconnect.com.ar/reservas", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Typ e": "application/json",
       },
       body: JSON.stringify(payload),
     });
