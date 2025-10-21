@@ -105,9 +105,9 @@ const PaquetesBusqueda = () => {
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={4} lg={2.3}>
             <Box sx={{ 
-              paddingRight: { md: 5, lg: 5 }, 
+              paddingRight: { md: 3, lg: 4 }, 
               height: "100%",
-              px: { xs: 1, sm: 1, md: 1 }
+              px: { xs: 0, sm: 1, md: 0 }
             }}>
               <PanelFiltros />
             </Box>
@@ -120,7 +120,7 @@ const PaquetesBusqueda = () => {
                 minHeight: "calc(100vh - 150px)",
                 display: "flex",
                 flexDirection: "column",
-                paddingLeft: { md: 1, lg: 1 },
+                paddingLeft: { md: 3, lg: 4 },
               }}
             >
               <ListadoPaquetes

@@ -185,7 +185,7 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
         }}
       >
         <CartaMesImagen
-          imagen={paquete.imagen_principal || "/imagenes/default-image.jpg"}
+          paquete={paquete}
           alt={paquete.titulo}
           cargando={false}
           colorSecundario={colorSecundario}

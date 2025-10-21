@@ -7,7 +7,7 @@ import { obtenerUbicaciones } from "../../../../services/comunes/ubicacionesServ
 import PopperUbicaciones from "./campoDestino/PopperUbicaciones";
 
 interface UbicacionIATA { codigo: string; nombre: string; }
-interface CampoBusquedaProps { label: "Ciudad de Salida" | "Ciudad de Destino"; }
+interface CampoBusquedaProps { label: "salida" | "destino"; }
 
 const INPUT_HEIGHT = 36;
 const makeInputSx = (text: string, underline: string, focus: string, font: string) => ({
@@ -47,7 +47,7 @@ const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
   const [open, setOpen] = useState(false);
   const [opcionesFiltradas, setOpcionesFiltradas] = useState<UbicacionIATA[]>([]);
 
-  const isOrigin = label === "Ciudad de Salida";
+  const isOrigin = label === "salida";
   const displayValue = isOrigin ? uiValues.ciudadOrigenDisplay : uiValues.destinoDisplay;
   const inputValue = displayValue ?? "";
   const fieldError = isOrigin ? errors.ciudadOrigen : errors.destino;
