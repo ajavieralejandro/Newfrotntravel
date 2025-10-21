@@ -38,7 +38,6 @@ export const obtenerPaquetesDestacadosPaginados = async (
       `https://travelconnect.com.ar/paquetes-paginados?${params.toString()}`,
       {
         headers: {
-          Origin: "https://tuviaje.travelconnect.com.ar",
           Accept: "application/json",
         },
       }
