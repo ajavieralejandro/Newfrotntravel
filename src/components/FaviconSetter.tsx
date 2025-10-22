@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useDatosGenerales } from "../contextos/agencia/DatosAgenciaContext";
-import LogAgencia from "../../src/assets/Logo-1-Color.png";
+import LogAgencia from '../assets/logo-1-Color.png';
 
 export default function FaviconSetter() {
   const datosGenerales = useDatosGenerales();

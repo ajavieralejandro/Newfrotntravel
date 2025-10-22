@@ -5,7 +5,7 @@ import IzquierdaArriba from "./IzquierdaArriba";
 import IzquierdaAbajo from "./IzquierdaAbajo";
 import DerechaArriba from "./DerechaArriba";
 import DerechaAbajo from "./DerechaAbajo";
-import LogAgencia from "../../assets/Logo-1-Color.png";
+import LogAgencia from '../assets/logo-1-Color.png';
 
 const Footer: FunctionComponent = () => {
   const footer = useFooter();
