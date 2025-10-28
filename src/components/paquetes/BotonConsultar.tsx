@@ -34,7 +34,8 @@ const BotonConsultar = ({ tipografia = "Arial", paquete }: BotonConsultarProps) 
     setAnchorEl(null);
   };
 
-  const handleClickBoton = () => {
+  const handleClickBoton = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const opcion = opcionSeleccionada.toLowerCase();
 
     if (opcion === "whatsapp") {
@@ -44,7 +45,8 @@ const BotonConsultar = ({ tipografia = "Arial", paquete }: BotonConsultarProps) 
       const mensaje = `Me gustaría conocer más acerca del paquete “${nombrePaquete}” ofrecido a través de ${operador}.`;
       const encodedMessage = encodeURIComponent(mensaje);
 
-      const numeroWhatsapp = footer?.redes?.whatsapp?.replace(/[^0-9]/g, '');
+      var numeroWhatsapp = footer?.redes?.whatsapp?.replace(/[^0-9]/g, '');
+      if (numeroWhatsapp === undefined) {numeroWhatsapp = "541165371805"}
 
       if (numeroWhatsapp) {
         window.open(`https://wa.me/${numeroWhatsapp}?text=${encodedMessage}`, "_blank");
