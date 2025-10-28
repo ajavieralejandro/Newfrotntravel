@@ -6,8 +6,8 @@ import LogAgencia from '../assets/logo-1-Color.png';
 
 export default function FaviconSetter() {
   const datosGenerales = useDatosGenerales();
-  //const logoAgencia = datosGenerales?.logoAgencia; descomentar si el logo se agrega en datos generales
-const logoAgencia = LogAgencia;
+  const logoAgencia = datosGenerales?.logoAgencia; 
+//const logoAgencia = LogAgencia;
   useEffect(() => {
     if (!logoAgencia) return;
 

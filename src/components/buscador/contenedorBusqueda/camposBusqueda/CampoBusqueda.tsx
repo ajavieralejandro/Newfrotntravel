@@ -47,7 +47,7 @@ const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
   const [open, setOpen] = useState(false);
   const [opcionesFiltradas, setOpcionesFiltradas] = useState<UbicacionIATA[]>([]);
 
-  const isOrigin = label === "salida";
+  const isOrigin = label === "destino";
   const displayValue = isOrigin ? uiValues.ciudadOrigenDisplay : uiValues.destinoDisplay;
   const inputValue = displayValue ?? "";
   const fieldError = isOrigin ? errors.ciudadOrigen : errors.destino;
@@ -111,6 +111,8 @@ const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
             const v = e.target.value;
             if (isOrigin) setUIValues({ ciudadOrigenDisplay: v });
             else setUIValues({ destinoDisplay: v });
+            setDestino(v);
+            console.log("acccc1" + isOrigin)
           }}
           onFocus={(e) => { setAnchorEl(e.currentTarget); setOpen(true); }}
           onBlur={() => {
@@ -130,6 +132,8 @@ const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
             if (isOrigin) { setCiudadOrigen(valor); setUIValues({ ciudadOrigenDisplay: valor }); }
             else { setDestino(valor); setUIValues({ destinoDisplay: valor }); }
             setOpen(false);
+            setDestino(valor);
+            console.log("acccc2" + isOrigin)
           }}
           label={label}
           colorPrimario={underline}

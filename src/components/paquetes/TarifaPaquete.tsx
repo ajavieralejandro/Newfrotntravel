@@ -9,7 +9,7 @@ interface TarifaPaqueteProps {
   tarifa: number | null | undefined;
   impuestos: number | null | undefined;
   divisa: string | null | undefined;
-  total: number | null | undefined;
+  total: string | null | undefined;
   wp: PaqueteData;
   cargando?: boolean;
 }
@@ -50,7 +50,7 @@ const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false 
     return `${currency} ${amount}`;
   };
 
-  const mostrarConsultar = !total || total === 0;
+  const mostrarConsultar = !total || total === "";
 
   return (
     <Box
@@ -85,7 +85,7 @@ const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false 
           {/* Encabezado / Precio principal */}
           <Box sx={{ width: "100%" }}>
             <Typography variant="body1" fontWeight="bold" sx={{ color: colorTipografia, mb: 2 }}>
-              Tarifa promedio por pasajero
+              Precio Desde
             </Typography>
 
             {mostrarConsultar ? (
@@ -94,13 +94,13 @@ const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false 
               </Typography>
             ) : (
               <Typography variant="h3" fontWeight="bold" sx={{ color: colorTipografia }}>
-                {displayAmount(tarifa)}
+                {total}
               </Typography>
             )}
           </Box>
 
           {/* Desglose */}
-          {!mostrarConsultar && (
+          { /**** !mostrarConsultar && (
             <Box sx={{ width: "100%", mt: 4, flexGrow: 1 }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                 <MonetizationOnIcon sx={{ color: colorTipografia, mr: 1 }} />
@@ -130,11 +130,11 @@ const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false 
                   TOTAL
                 </Typography>
                 <Typography variant="h6" fontWeight="bold" sx={{ color: colorTipografia }}>
-                  {displayAmount(total)}
+                  {total}
                 </Typography>
               </Box>
             </Box>
-          )}
+          )*/}
 
           {/* CTA */}
           <Box sx={{ mt: 4, width: "100%" }}>

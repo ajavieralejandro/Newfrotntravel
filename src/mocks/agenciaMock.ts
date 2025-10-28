@@ -14,7 +14,7 @@ export const agenciaMock: AgenciaBackData[] = [
     tipografia_agencia: 'Roboto',
     color_tipografia_agencia: '#080808',
     color_fondo_app: '#E5EEF0',
-    color_principal: null,
+    color_principal: '#E5EEF0',
     color_secundario: '#1F98A5',
     color_terciario: '#FFFFFF',
     
@@ -25,11 +25,11 @@ export const agenciaMock: AgenciaBackData[] = [
     header_video_background_opacidad: 0.1,
     
     // Buscador
-    buscador_tipografia: null,
+    buscador_tipografia: '#E5EEF0',
     buscador_tipografia_color: '#080808',
     buscador_tipografia_color_label: '#080808',
-    buscador_inputColor: null,
-    buscador_inputFondoColor: null,
+    buscador_inputColor: '#E5EEF0',
+    buscador_inputFondoColor: '#E5EEF0',
     buscador_color_primario: '#1F98A5',
     buscador_color_secundario: '#9DBF9C',
     buscador_color_terciario: '#E5EEF0',
@@ -61,8 +61,8 @@ export const agenciaMock: AgenciaBackData[] = [
     
     // Quienes somos
     quienes_somos_es: 'Somos la agencia de viajes que te llevará a ese destino que querés alcanzar. Contamos con más de 15 años de experiencia en el mercado de viajes y turismo, tanto para el segmento vacacional como para el corporativo',
-    quienes_somos_en: null,
-    quienes_somos_pt: null,
+    quienes_somos_en: "",
+    quienes_somos_pt: "",
     
     // Footer
     footer_texto: '© 2025 - TRAVEL SPIRIT - S.R.L.Legajo 18159 CUIT 30-71687811-9',
@@ -73,15 +73,15 @@ export const agenciaMock: AgenciaBackData[] = [
     footer_color_terciario: '#E5EEF0',
     
     // Contacto y redes
-    footer_facebook: null,
+    footer_facebook: "",
     footer_instagram: 'https://www.instagram.com/travelspirit.ok/',
     footer_twitter: 'https://www.linkedin.com/checkpoint/challengesV3/AQFmF9TquGWycAAAAZhOUzXDmAoeFwXHgg5vUvg9ZlkMRxCWsohPwBBPT9GN8HNA_JpVLy7hTR_ADjGWVw6RdCaqJa3CBQ',
     footer_whatsapp: '+14067406473',
-    footer_email: null,
-    footer_telefono: null,
-    footer_direccion: null,
-    footer_ciudad: null,
-    footer_pais: null,
+    footer_email: "null",
+    footer_telefono: "null",
+    footer_direccion: "null",
+    footer_ciudad: "",
+    footer_pais: "",
     
     // Términos y condiciones
     terminos_y_condiciones: null,

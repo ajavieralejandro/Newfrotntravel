@@ -12,6 +12,7 @@ interface InfoPaqueteProps {
   regimen: string;
   destinos: string;
   cargando?: boolean;
+  subtitulo: string;
 }
 
 /** Decodifica entidades HTML comunes (sin tocar el DOM) */
@@ -78,6 +79,7 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
   regimen,
   destinos,
   cargando = false,
+  subtitulo,
 }) => {
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
@@ -112,7 +114,7 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
         textAlign: "center",
         pt: 4,
         px: 0,
-        backgroundColor: colorFondo,
+        backgroundColor: "#197c84",
         flexGrow: 1,
       }}
     >
@@ -132,9 +134,10 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
         {cargando ? (
           <Skeleton width="60%" height={30} />
         ) : (
+          <>
           <Tooltip title={fullTitle} arrow enterDelay={700}>
             <Typography
-              variant="h4"
+              variant="h5"
               fontWeight="bold"
               sx={{
                 fontFamily: tipografia,
@@ -149,6 +152,15 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
               {displayTitle}
             </Typography>
           </Tooltip>
+      
+      <Typography
+        variant="h5"
+        color="text.secondary"
+        sx={{ fontFamily: tipografia, mt: 0.5 }}
+      >
+        {subtitulo}
+      </Typography>
+       </>
         )}
 
         <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
@@ -183,7 +195,7 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
               variant="body2"
               sx={{ fontFamily: tipografia, color: colorTipografia }}
             >
-              <b>Régimen:</b> {regimen}
+              <b>Tipo Habitacion:</b> {regimen}
             </Typography>
           )}
         </Grid>
@@ -195,12 +207,12 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
               variant="body2"
               sx={{ fontFamily: tipografia, color: colorTipografia }}
             >
-              <b>Duración:</b> {duracionTexto}
+              <b>Politica:</b> {duracionTexto}
             </Typography>
           )}
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "center" }}>
-          {cargando ? (
+          {/**cargando ? (
             <Skeleton width="80%" />
           ) : (
             <Typography
@@ -209,7 +221,7 @@ const InfoPaquete: React.FC<InfoPaqueteProps> = ({
             >
               <b>Destinos:</b> {destinos}
             </Typography>
-          )}
+          )**/}
         </Grid>
       </Grid>
 

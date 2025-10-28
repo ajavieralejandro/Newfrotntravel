@@ -1,6 +1,21 @@
-// interfaces/PaqueteData.ts
 import { Salida } from './Salida';
 import { Hotel } from './Hotel';
+
+export interface HotelDetalle {
+  hotelName: string;
+  hotelCode: string;
+  price: {
+    gross: string | number;
+    currency: string;
+  };
+  roomCode?: string; // primer rooms[0].code
+  roomDescription?: string; // primer rooms[0].description
+  boardCode?: string; // SA, AD...
+  cancelPolicy?: {
+    refundable: boolean;
+  };
+  imageUrl?: string[]; // imageUrl o hotels[].media.images[0].url o placeholder
+}
 
 export interface PaqueteData {
   id: number;
@@ -23,20 +38,16 @@ export interface PaqueteData {
   edad_menores: number;
   transporte: string | null;
 
-  // ⚠️ En el back llega como "ARS" y ya lo tenemos así
   tipo_moneda: string;
 
-  // Llega como string "0.00"
   descuento: string;
 
-  // En el back puede venir como string JSON ("[]") o como array tipado
   componentes: string | { tipo: string; detalle: string }[] | null;
 
-  // En el back puede venir como string JSON ("[]") o como array
-  categorias: string | string[] | null;
+  hotel: Hotel | null;
 
-  // En el back puede venir objeto único o array
-  hotel: Hotel | Hotel[] | null;
+  // ⚠️ Aquí agregamos un arreglo de hoteles con detalle mapeado
+  hotelDetalle?: HotelDetalle[];
 
   galeria_imagenes: string[];
 

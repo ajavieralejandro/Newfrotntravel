@@ -9,7 +9,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 interface IzquierdaArribaProps {
-  logo: string | null;
+  logo: string | null | undefined;
 }
 
 const IzquierdaArriba: FunctionComponent<IzquierdaArribaProps> = ({ logo }) => {

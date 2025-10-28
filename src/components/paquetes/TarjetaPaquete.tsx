@@ -10,7 +10,7 @@ import HotelesContent from "./HotelesContent";
 import DescripcionContent from "./DescripcionContent";
 import SalidasContent from "./SalidasContent";
 import TransporteContent from "./TransporteContent";
-import type { PaqueteData } from "../../interfaces/PaqueteData";
+import type { HotelDetalle, PaqueteData } from "../../interfaces/PaqueteData";
 import type { Salida } from "../../interfaces/Salida";
 import type { Hotel } from "../../interfaces/Hotel";
 
@@ -41,7 +41,10 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
-  const colorFondo = tarjetas?.color?.secundario || datosGenerales?.color?.secundario || "#f5f5f5";
+  
+  //const colorFondo = tarjetas?.color?.secundario || datosGenerales?.color?.secundario || "#f5f5f5";
+  const colorFondo = "#197c84"
+
 
   const [selectedTab, setSelectedTab] = useState<number | null>(null);
   const [expansionOpen, setExpansionOpen] = useState<boolean>(false);
@@ -57,6 +60,17 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
     : paquete.hotel
     ? [paquete.hotel as Hotel]
     : [];
+
+  const hotelesDetalle: HotelDetalle[] = Array.isArray(paquete.hotelDetalle)
+    ? (paquete.hotelDetalle as HotelDetalle[])
+    : paquete.hotelDetalle
+    ? [paquete.hotelDetalle as HotelDetalle]
+    : [];
+
+  let subTitulo = " Alojamiento + Desayuno";   
+    if(hotelesDetalle[0]?.boardCode=="SA"){
+      subTitulo = " Solo alojamiento"
+    }
 
   // 🔹 Derivados del paquete
   const {
@@ -78,21 +92,19 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
     // ✅ Duración robusta: "Consultar" si no hay noches; "Full day / sin alojamiento" si 0
     const noches = paquete.cant_noches as number | null | undefined;
     let _duracion: string;
-    if (noches === 0) {
-      _duracion = "Full day / sin alojamiento";
-    } else if (noches == null || Number.isNaN(noches)) {
-      _duracion = "Consultar";
+    if (hotelesDetalle[0]?.cancelPolicy?.refundable) {
+      _duracion = "Reembolsable";
     } else {
-      _duracion = `${noches} noche${noches === 1 ? "" : "s"}`;
+      _duracion = "No reembolsable";
     }
 
     const _destinos = [paquete.ciudad, paquete.pais].filter(Boolean).join(", ") || "Destino no disponible";
-    const _regimen = "Según Itinerario";
-    const _imagen = paquete.imagen_principal || "/imagenes/default-image.jpg";
-
+    const _regimen = hotelesDetalle[0]?.roomCode || hotelesDetalle[0]?.roomDescription || "";
+    const _imagen = hotelesDetalle[0]?.imageUrl?.[0] || "/imagenes/default-image.jpg";
+    console.log("imagessssssssssssssss" , _imagen)
     const _tarifa = toNum(_salidaBase?.doble_precio);
     const _impuestos = toNum(_salidaBase?.doble_impuesto);
-    const _total = _tarifa + _impuestos;
+    const _total = hotelesDetalle[0]?.price.currency + hotelesDetalle[0]?.price.gross;
 
     const deSalidas = (paquete.salidas ?? [])
       .map((s) => s?.tipo_transporte)
@@ -122,6 +134,7 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
     <InfoPaquete
       idPaquete={paquete.id}
       titulo={paquete.titulo || "Título no disponible"}
+      subtitulo={subTitulo}
       fechaSalida={fechaSalida}
       duracion={duracion}
       regimen={regimen}

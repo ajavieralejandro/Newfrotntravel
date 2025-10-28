@@ -12,6 +12,8 @@ export interface FormularioUI {
   destinoDisplay: string;
   fechaSalidaDisplay: string;
   viajerosDisplay: string;
+  fechaVueltaDisplay: string;
+  nochesDisplay: string
 }
 
 interface FormularioContextProps {
@@ -19,6 +21,8 @@ interface FormularioContextProps {
   ciudadOrigen: string;
   destino: string;
   fechaSalida: Date | null;
+  fechaVuelta: Date | null;
+  noches: string;
   viajeros: Viajeros;
   
   // Estados de UI para sincronización
@@ -27,7 +31,9 @@ interface FormularioContextProps {
   // Setters principales
   setCiudadOrigen: (ciudad: string) => void;
   setDestino: (destino: string) => void;
-  setFechaSalida: (fecha: Date | null) => void;
+  setFechaSalida: (fechaSalida: Date | null) => void;
+  setFechaVuelta: (fechaVuelta: Date | null) => void;
+  setNoches: (noches: string) => void;
   setViajeros: (viajeros: Viajeros) => void;
   
   // Setters de UI
@@ -50,6 +56,8 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [ciudadOrigen, setCiudadOrigen] = useState<string>("");
   const [destino, setDestino] = useState<string>("");
   const [fechaSalida, setFechaSalida] = useState<Date | null>(null);
+  const [fechaVuelta, setFechaVuelta] = useState<Date | null>(null);
+  const [noches, setNoches] = useState<string>("");
   const [viajeros, setViajeros] = useState<Viajeros>({ adultos: 2, menores: 0 });
   
   // Estados de UI para sincronización
@@ -57,7 +65,9 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     ciudadOrigenDisplay: "",
     destinoDisplay: "",
     fechaSalidaDisplay: "",
-    viajerosDisplay: ""
+    viajerosDisplay: "",
+    fechaVueltaDisplay: "",
+    nochesDisplay: ""
   });
   
   // Estados de validación
@@ -115,11 +125,17 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     const viajerosError = validateField('viajeros', viajeros);
     if (viajerosError) newErrors.viajeros = viajerosError;
+
+    const fechaVuletaError = validateField('fechaVuelta', fechaVuelta);
+    if (fechaVuletaError) newErrors.fechaVuelta = fechaVuletaError;
+
+    const nochesError = validateField('noches', noches);
+    if (nochesError) newErrors.noches = nochesError;
     
     setErrors(newErrors);
     
     // Siempre permitir envío, incluso con campos vacíos
-    console.log("Formulario enviado:", { ciudadOrigen, destino, fechaSalida, viajeros });
+    console.log("Formulario enviado:", { ciudadOrigen, destino, fechaSalida, viajeros, fechaVuelta, noches });
     return true;
   };
 
@@ -129,13 +145,16 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setDestino("");
     setFechaSalida(null);
     setViajeros({ adultos: 2, menores: 0 });
-    
+    setFechaVuelta(null);
+    setNoches("");
     // Reset de UI values para sincronización
     setUIValues({
       ciudadOrigenDisplay: "",
       destinoDisplay: "",
       fechaSalidaDisplay: "",
-      viajerosDisplay: ""
+      viajerosDisplay: "",
+      fechaVueltaDisplay: "",
+      nochesDisplay: ""
     });
     
     // Reset de errores
@@ -149,11 +168,15 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         destino,
         fechaSalida,
         viajeros,
+        fechaVuelta,
+        noches,
         uiValues,
         setCiudadOrigen,
         setDestino,
         setFechaSalida,
         setViajeros,
+        setFechaVuelta,
+        setNoches,
         setUIValues,
         errors,
         isValid,

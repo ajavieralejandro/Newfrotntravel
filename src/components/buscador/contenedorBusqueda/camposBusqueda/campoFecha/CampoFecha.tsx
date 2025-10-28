@@ -34,12 +34,22 @@ const makeInputSx = (text: string, underline: string, focus: string, font: strin
   },
 });
 
-interface CampoFechaProps { label: string; }
+interface CampoFechaProps {
+  label: "Fecha de Ida" | "Fecha de Vuelta";
+}
 
 const CampoFecha: React.FC<CampoFechaProps> = ({ label }) => {
   const buscador = useBuscador();
   const datosGenerales = useDatosGenerales();
-  const { fechaSalida, setFechaSalida, uiValues, setUIValues, errors } = useFormulario();
+  const {
+    fechaSalida,
+    setFechaSalida,
+    fechaVuelta,
+    setFechaVuelta,
+    uiValues,
+    setUIValues,
+    errors,
+  } = useFormulario();
 
   const text =
     buscador?.inputColor || buscador?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#000";
@@ -47,31 +57,51 @@ const CampoFecha: React.FC<CampoFechaProps> = ({ label }) => {
   const underline = buscador?.color?.primario || datosGenerales?.color?.primario || "#a73439";
   const focus = buscador?.color?.terciario || datosGenerales?.color?.terciario || "#e52822";
 
+  // 🟢 Restaurar fecha desde localStorage
   useEffect(() => {
-    if (!fechaSalida) {
-      const valores = localStorage.getItem("valoresPrevios");
-      if (valores) {
-        const { fechaSalida: f } = JSON.parse(valores);
-        if (f) {
-          const fecha = new Date(f);
-          setFechaSalida(fecha);
-          setUIValues({ fechaSalidaDisplay: dayjs(fecha).format("DD/MM/YYYY") });
-        }
+    const valores = localStorage.getItem("valoresPrevios");
+    if (valores) {
+      const { fechaSalida: fSalida, fechaVuelta: fVuelta } = JSON.parse(valores);
+      if (label === "Fecha de Ida" && fSalida && !fechaSalida) {
+        const fecha = new Date(fSalida);
+        setFechaSalida(fecha);
+        setUIValues({ fechaSalidaDisplay: dayjs(fecha).format("DD/MM/YYYY") });
+      } else if (label === "Fecha de Vuelta" && fVuelta && !fechaVuelta) {
+        const fecha = new Date(fVuelta);
+        setFechaVuelta(fecha);
+        setUIValues({ fechaVueltaDisplay: dayjs(fecha).format("DD/MM/YYYY") });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 🟢 Actualizar display cuando cambia la fecha
   useEffect(() => {
-    if (fechaSalida) setUIValues({ fechaSalidaDisplay: dayjs(fechaSalida).format("DD/MM/YYYY") });
-    else if (uiValues.fechaSalidaDisplay) setUIValues({ fechaSalidaDisplay: "" });
+    if (label === "Fecha de Ida") {
+      if (fechaSalida)
+        setUIValues({ fechaSalidaDisplay: dayjs(fechaSalida).format("DD/MM/YYYY") });
+      else setUIValues({ fechaSalidaDisplay: "" });
+    } else {
+      if (fechaVuelta)
+        setUIValues({ fechaVueltaDisplay: dayjs(fechaVuelta).format("DD/MM/YYYY") });
+      else setUIValues({ fechaVueltaDisplay: "" });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fechaSalida]);
+  }, [fechaSalida, fechaVuelta]);
 
   if (!datosGenerales) return null;
 
-  const fechaDayjs = fechaSalida ? dayjs(fechaSalida) : null;
-  const fieldError = errors.fechaSalida;
+  const fechaDayjs =
+    label === "Fecha de Ida"
+      ? fechaSalida
+        ? dayjs(fechaSalida)
+        : null
+      : fechaVuelta
+      ? dayjs(fechaVuelta)
+      : null;
+
+  const fieldError =
+    label === "Fecha de Ida" ? errors.fechaSalida : errors.fechaVuelta;
 
   return (
     <Box display="flex" flexDirection="column" gap={0.75} alignItems="flex-start" width="100%">
@@ -87,8 +117,17 @@ const CampoFecha: React.FC<CampoFechaProps> = ({ label }) => {
         value={fechaDayjs}
         onChange={(nv) => {
           const fecha = nv ? nv.toDate() : null;
-          setFechaSalida(fecha);
-          setUIValues({ fechaSalidaDisplay: fecha ? dayjs(fecha).format("DD/MM/YYYY") : "" });
+          if (label === "Fecha de Ida") {
+            setFechaSalida(fecha);
+            setUIValues({
+              fechaSalidaDisplay: fecha ? dayjs(fecha).format("DD/MM/YYYY") : "",
+            });
+          } else {
+            setFechaVuelta(fecha);
+            setUIValues({
+              fechaVueltaDisplay: fecha ? dayjs(fecha).format("DD/MM/YYYY") : "",
+            });
+          }
         }}
         slotProps={{
           textField: {

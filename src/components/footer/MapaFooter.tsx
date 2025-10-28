@@ -1,45 +1,65 @@
-import React from 'react';
+import React from "react";
+import { Box, Typography } from "@mui/material";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-/* 1) IMPORTS CORRECTOS de react-leaflet (si usás otra ruta, ajustá el path de archivo) */
-import { MapContainer as RLMapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+// ✅ Ícono por defecto de Leaflet corregido para React
+const defaultIcon = L.icon({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
-/* 2) Helper: validar que algo es renderizable por React */
-const isComponent = (C: any) =>
-  typeof C === 'function' || (C && typeof C === 'object' && (C as any).$$typeof);
+L.Marker.prototype.options.icon = defaultIcon;
 
-type Props = {
-  center?: [number, number];
-  zoom?: number;
-  style?: React.CSSProperties;
+// 📍 Coordenadas fijas de Av. del Libertador 218
+const ubicacionFija = {
+  lat: -34.59191,
+  lng: -58.37699,
 };
 
-const DEFAULT_CENTER: [number, number] = [-38.7196, -62.2663]; // Bahía Blanca como ejemplo
+const direccion = "Av. del Libertador 218, 1º Piso, CABA, Argentina";
 
-/* 3) EXPORT DEFAULT (coherente con cómo lo importás en MapaFooter) */
-export default function MapContainerComponent({
-  center = DEFAULT_CENTER,
-  zoom = 13,
-  style,
-}: Props) {
-  // Guardas para evitar el “no es función”
-  if (!isComponent(RLMapContainer)) {
-    console.error('[MapContainerComponent] RLMapContainer inválido:', RLMapContainer);
-    return null;
-  }
-  if (!isComponent(TileLayer)) {
-    console.error('[MapContainerComponent] TileLayer inválido:', TileLayer);
-    return null;
-  }
-
+const MapaFooter: React.FC = () => {
   return (
-    <div style={{ height: 320, width: '100%', ...style }}>
-      <RLMapContainer center={center} zoom={zoom} style={{ height: '100%', width: '100%' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker position={center}>
-          <Popup>Estamos acá</Popup>
+    <Box sx={{ mt: 2, width: "100%" }}>
+      <Typography
+        variant="body2"
+        textAlign="center"
+        mb={1}
+        sx={{ fontWeight: 500 }}
+      >
+        📍 Dirección: {direccion}
+      </Typography>
+
+      <MapContainer
+        center={[ubicacionFija.lat, ubicacionFija.lng]}
+        zoom={16}
+        scrollWheelZoom={false}
+        style={{
+          width: "100%",
+          height: "150px", // puedes ajustar esta altura
+          borderRadius: "10px",
+        }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        />
+        <Marker position={[ubicacionFija.lat, ubicacionFija.lng]}>
+          <Popup>
+            📍 Av. del Libertador 218, 1º Piso, CABA, Argentina
+          </Popup>
         </Marker>
-      </RLMapContainer>
-    </div>
+      </MapContainer>
+    </Box>
   );
-}
+};
+
+export default MapaFooter;

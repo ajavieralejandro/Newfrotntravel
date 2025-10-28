@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from "react";
-import {
-  Grid,
-  Box,
-  Button,
-  CircularProgress,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 import CartaMes from "../contenedorCartaMes/CartaMes";
-import { useDatosGenerales, useTarjetas } from "../../../contextos/agencia/DatosAgenciaContext";
+import {
+  useDatosGenerales,
+  useTarjetas,
+} from "../../../contextos/agencia/DatosAgenciaContext";
 import { obtenerPaquetesDestacadosPaginados } from "../../../services/destacados/servicioCartasDestacadoMes";
 import { PaqueteData } from "../../../interfaces/PaqueteData";
 
 const ContenedorCartasMes: React.FC = () => {
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
+
   const [paquetes, setPaquetes] = useState<PaqueteData[]>([]);
   const [pagina, setPagina] = useState(1);
   const [ultimaPagina, setUltimaPagina] = useState(1);
@@ -24,7 +27,7 @@ const ContenedorCartasMes: React.FC = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const perPage = isMobile ? 4 : 8;
+  const perPage = isMobile ? 4 : 9;
 
   const idAgencia = datosGenerales?.idAgencia;
 
@@ -49,7 +52,9 @@ const ContenedorCartasMes: React.FC = () => {
       console.log("📦 Datos crudos recibidos del backend:", respuesta.paquetes);
 
       setPaquetes((prev) =>
-        paginaAObtener === 1 ? respuesta.paquetes : [...prev, ...respuesta.paquetes]
+        paginaAObtener === 1
+          ? respuesta.paquetes
+          : [...prev, ...respuesta.paquetes]
       );
 
       setPagina(respuesta.paginaActual);
@@ -77,8 +82,6 @@ const ContenedorCartasMes: React.FC = () => {
 
   const tarjetaColorPrimario =
     tarjetas?.color?.primario || datosGenerales.color?.primario || "#CCCCCC";
-
-
 
   return (
     <Box
@@ -142,19 +145,16 @@ const ContenedorCartasMes: React.FC = () => {
             <Button
               variant="contained"
               onClick={() => cargarPagina(pagina + 1)}
+              disabled={cargando}
               sx={{
                 mt: 2,
                 borderRadius: "6px",
                 backgroundColor: tarjetaColorPrimario,
-                color: tarjetaTipografiaColor,              // 👈 color base
-                // Asegura que texto e ícono hereden el color
-                "& .MuiTypography-root, & svg": { color: "inherit" },
-                // 👇 Invertimos colores en hover
+                color: tarjetaTipografiaColor,
                 "&:hover": {
                   backgroundColor: tarjetaTipografiaColor,
                   color: tarjetaColorPrimario,
                 },
-                // Opcional: feedback al presionar / accesibilidad
                 "&:active": { filter: "brightness(0.95)" },
                 "&:focus-visible": {
                   outline: `2px solid ${tarjetaTipografiaColor}`,
@@ -170,15 +170,9 @@ const ContenedorCartasMes: React.FC = () => {
                   boxShadow: "none",
                 },
               }}
-              disabled={cargando}
             >
-              <Typography
-                variant="button"
-                sx={{ fontFamily: tarjetaTipografia, color: "inherit" }}
-              >
-                Ver más
-              </Typography>
-              <ExpandMoreIcon sx={{ color: "inherit" }} />
+              Ver más
+              <ExpandMoreIcon sx={{ ml: 0.5 }} />
             </Button>
           )}
 

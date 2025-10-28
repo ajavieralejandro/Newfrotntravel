@@ -221,8 +221,8 @@ const BannerRegistro: React.FC = () => {
                   backgroundColor: "transparent",
                   transition: "background-color 0.25s ease, transform 0.15s ease",
                   "&:hover": {
-                    backgroundColor: tipografiaColor,
-                    color: fondoColor,
+                    backgroundColor: "#E2E3E4",
+                    color: "white",
                     transform: "translateY(-1px)",
                   },
                   "&:active": { transform: "translateY(0)" },

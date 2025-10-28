@@ -27,7 +27,7 @@ const Hotel: React.FC<HotelProps> = ({ hotel }) => {
       sx={{
         p: 3,
         borderRadius: 4,
-        backgroundColor: "#fff",
+        backgroundColor: "white",
         border: `1px solid ${colorPrimario}`,
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
       }}

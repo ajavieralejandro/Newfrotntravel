@@ -5,7 +5,6 @@ import IzquierdaArriba from "./IzquierdaArriba";
 import IzquierdaAbajo from "./IzquierdaAbajo";
 import DerechaArriba from "./DerechaArriba";
 import DerechaAbajo from "./DerechaAbajo";
-import LogAgencia from '../../assets/logo-1-Color.png';
 
 const Footer: FunctionComponent = () => {
   const footer = useFooter();
@@ -13,7 +12,8 @@ const Footer: FunctionComponent = () => {
 
   const fondoColor =
     footer?.color?.terciario || datosGenerales?.color?.terciario || "rgba(0, 0, 0, 0.7)";
-  const logo = LogAgencia;
+
+  const logo = datosGenerales?.logoAgencia ?? "";
   const currentYear = new Date().getFullYear();
 
   return (

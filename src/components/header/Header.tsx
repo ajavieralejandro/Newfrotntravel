@@ -3,7 +3,6 @@ import { AppBar, Toolbar, Box, useTheme, useMediaQuery } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useHeader, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
-import LogAgencia from '../../assets/logo-1-Color.png';
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
@@ -158,10 +157,9 @@ const Header: React.FC = () => {
           transition={{ duration: 0.8 }}
           whileHover={{ scale: 1.05 }}
         >
-          {//datosGenerales?.logoAgencia && ( esta queda comentada por si sacan el logo por datos Generales
-          (
+          {datosGenerales?.logoAgencia && (
             <img
-              src={LogAgencia}
+              src={datosGenerales.logoAgencia}
               alt="Logo Agencia"
               onClick={() => navigate("/")}
               onError={(e) => {
@@ -169,7 +167,7 @@ const Header: React.FC = () => {
                 (e.currentTarget as HTMLImageElement).style.display = "none";
               }}
               style={{
-                height: isMobile ? "120px" : isTablet ? "160px" : "150px",
+                height: isMobile ? "120px" : isTablet ? "160px" : "200px",
                 width: "auto",
                 maxWidth: "90vw",
                 cursor: "pointer",

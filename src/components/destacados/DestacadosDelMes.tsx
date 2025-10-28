@@ -61,8 +61,8 @@ const DestacadosDelMes: React.FC = () => {
               fontSize: {
                 xs: "1.8rem",
                 sm: "2.2rem",
-                md: "2 rem",
-                lg: "3 rem",
+                md: "2rem",
+                lg: "3rem",
               },
             }}
           >

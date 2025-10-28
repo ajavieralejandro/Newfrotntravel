@@ -44,7 +44,7 @@ import {
           {/* 🔹 Banner superior */}
           <Box
             sx={{
-              backgroundColor: colorPrimario,
+              backgroundColor: "#1F98A5",
               color: "white",
               padding: isMobile ? "12px" : "15px",
               textAlign: "center",
@@ -97,7 +97,7 @@ import {
               <Button
                 variant="contained"
                 sx={{
-                  backgroundColor: colorPrimario,
+                  backgroundColor: "#1F98A5",
                   color: "white",
                   fontWeight: "bold",
                   fontFamily: tipografia,
@@ -105,7 +105,7 @@ import {
                   py: 1,
                   fontSize: isMobile ? "0.8rem" : "0.9rem",
                   borderRadius: "8px",
-                  "&:hover": { backgroundColor: "#0056b3" },
+                  "&:hover": { backgroundColor: "#4FB0B8" },
                 }}
                 onClick={onClose}
               >

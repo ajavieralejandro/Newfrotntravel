@@ -57,7 +57,7 @@ const BotonArrepentimientoModal: React.FC<Props> = ({ open, onClose, onSubmit })
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ textAlign: "center", fontWeight: 600 }}>
+      <DialogTitle sx={{ textAlign: "center", fontWeight: 600, backgroundColor: "#4FB0B8" }}>
         Botón de Arrepentimiento
       </DialogTitle>
       <DialogContent>
@@ -94,17 +94,10 @@ const BotonArrepentimientoModal: React.FC<Props> = ({ open, onClose, onSubmit })
         </Grid>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-        <Button variant="outlined" sx={{
-              color: "#9A9898",
-              borderColor: "#9A9898",
-              "&:hover": {
-                borderColor: "#7d7d7d", // un poco más oscuro en hover
-                backgroundColor: "rgba(154, 152, 152, 0.08)", // leve fondo
-              },
-            }} onClick={onClose}>
+        <Button variant="contained" sx={{ backgroundColor: "#4FB0B8" }} onClick={onClose}>
           Cancelar
         </Button>
-        <Button variant="contained" sx={{ backgroundColor: "#9A9898" }} onClick={handleSubmit}>
+        <Button variant="contained" sx={{ backgroundColor: "#4FB0B8" }} onClick={handleSubmit}>
           Enviar solicitud
         </Button>
       </DialogActions>

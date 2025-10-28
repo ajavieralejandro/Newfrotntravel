@@ -8,6 +8,7 @@ const BotonAnimado: FC = () => {
   const footer = useFooter();
 
   const textoColor = footer?.tipografiaColor || "#ffffff";
+
   const bgColor = footer?.color?.terciario || "#000000";
   const font = footer?.tipografia || "inherit";
 
@@ -23,6 +24,7 @@ const BotonAnimado: FC = () => {
             width: 220,
             height: 220,
             opacity: 1,
+            backgroundColor: "#1F98A5",
           },
           "&:hover .arr-1": {
             right: "-25%",

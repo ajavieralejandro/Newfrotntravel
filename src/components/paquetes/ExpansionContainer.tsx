@@ -11,7 +11,7 @@ interface ExpansionContainerProps {
 const ExpansionContainer: React.FC<ExpansionContainerProps> = ({ open, children }) => {
   return (
     <Collapse in={open} timeout={300} unmountOnExit>
-      <Box sx={{ backgroundColor: '#f5f5f5', padding: 2 }}>
+      <Box sx={{ backgroundColor: '#197c84', padding: 2 }}>
         {children}
       </Box>
     </Collapse>

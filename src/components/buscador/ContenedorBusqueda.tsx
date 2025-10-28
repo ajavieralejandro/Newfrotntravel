@@ -28,7 +28,7 @@ const ContenedorBusqueda: React.FC = () => {
         position: "relative",
         width: "95%",               // 🔹 Más ancho
         maxWidth: "1250px",         // 🔹 Más largo
-        backgroundColor: fondoColor,
+        backgroundColor: "#4FB0B8",
         color: textColor,
         fontFamily,
         borderRadius: "6px",

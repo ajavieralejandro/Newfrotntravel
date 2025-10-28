@@ -21,8 +21,10 @@ const TabsPaquete: React.FC<TabsPaqueteProps> = ({ onTabChange }) => {
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
 
-  const colorFondo =
-    tarjetas?.color?.secundario || datosGenerales?.color?.secundario || "#f5f5f5";
+  //const colorFondo =
+  //  tarjetas?.color?.secundario || datosGenerales?.color?.secundario || "#f5f5f5";
+  const colorFondo = "#197c84"
+
   const colorIndicador =
     tarjetas?.color?.primario || datosGenerales?.color?.primario || "#1976d2";
   const colorTexto =
@@ -51,7 +53,7 @@ const TabsPaquete: React.FC<TabsPaqueteProps> = ({ onTabChange }) => {
         justifyContent: "center",
         backgroundColor: colorFondo,
         p: isMobile ? 0.5 : 1,
-        borderRadius: 2,
+        borderRadius: 0,
         boxShadow: 2,
       }}
     >

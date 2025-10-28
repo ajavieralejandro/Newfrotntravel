@@ -16,11 +16,11 @@ export const fetchDatosAgenciaReal = async (): Promise<AgenciaBackData> => {
   const hostname = window.location.hostname;
   const esLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
 
-   const url = esLocalhost
-     ? 'https://vaguviajes.tur.ar/agencia2' 
-     : `${window.location.origin}/agencia2`;
+  // const url = esLocalhost
+  //   ? 'https://vaguviajes.tur.ar/agencia2' 
+  //   : `${window.location.origin}/agencia2`;
 
- // const url = 'https://hubtravel.travelconnect.com.ar/agencia2' //utilizado para realizar pruebas
+  const url = 'https://travelspirit.travelconnect.com.ar/agencia2' //utilizado para realizar pruebas
   const response = await fetch(url, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error("No se pudo obtener la información de la agencia");
 

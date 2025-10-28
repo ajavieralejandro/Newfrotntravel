@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import { Stack, Box } from "@mui/material";
 import { useFooter, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
-//import MapaFooter from "./MapaFooter";
+import MapaFooter from "./MapaFooter";
 
 const DerechaArriba: FunctionComponent = () => {
   const footer = useFooter();
@@ -28,7 +28,9 @@ const DerechaArriba: FunctionComponent = () => {
         width="100%"
         maxWidth="1200px"
       >
-    
+     <Stack direction="row"  alignItems="center" justifyContent="center">
+                <MapaFooter/>
+              </Stack>
 
         {/* Redes sociales */}
         <Stack

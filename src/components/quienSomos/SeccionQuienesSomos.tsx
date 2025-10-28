@@ -5,6 +5,7 @@ import ExploreIcon from "@mui/icons-material/Explore";
 import HikingIcon from "@mui/icons-material/Hiking";
 import { motion } from "framer-motion";
 import BotonAnimado from "./BotonAnimado";
+import { useTarjetas, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -20,7 +21,10 @@ const SeccionQuienesSomos = () => {
   const footer = useFooter();
   const theme = useTheme();
   const esMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const tarjetas = useTarjetas();
+  const datosGenerales = useDatosGenerales();
 
+ if (!datosGenerales) return null;
   const tipografia = footer?.tipografia || theme.typography.fontFamily;
   const colorTexto = footer?.tipografiaColor || theme.palette.text.primary;
   const bgColor = footer?.color?.terciario || theme.palette.background.default;
@@ -87,9 +91,9 @@ const SeccionQuienesSomos = () => {
           sx={{ mt: 4 }}
         >
           {[                                                     //aca los colores color: "#a73439" se puede agregar a datos generales
-            { icon: <FlightTakeoffIcon sx={{ fontSize: 48, color: "#a73439" }} />, label: "Viajes Personalizados" },
-            { icon: <ExploreIcon sx={{ fontSize: 48, color: "#a73439" }} />, label: "Destinos Increíbles" },
-            { icon: <HikingIcon sx={{ fontSize: 48, color: "#a73439" }} />, label: "Experiencias Únicas" },
+            { icon: <FlightTakeoffIcon sx={{ fontSize: 48, color: "#1F98A5" }} />, label: "Viajes Personalizados" },
+            { icon: <ExploreIcon sx={{ fontSize: 48, color: "#1F98A5" }} />, label: "Destinos Increíbles" },
+            { icon: <HikingIcon sx={{ fontSize: 48, color: "#1F98A5" }} />, label: "Experiencias Únicas" },
           ].map((item, index) => (
             <motion.div
               key={item.label}

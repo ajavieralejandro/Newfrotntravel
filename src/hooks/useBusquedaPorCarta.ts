@@ -10,10 +10,10 @@ export const useBusquedaPorCarta = () => {
 
   const navigate = useNavigate();
 
-  const buscarPorId = async (idPaquete: number) => {
+  const buscarPorId = async (id: String) => {
     setLoading(true);
     setErrorBusqueda(null);
-
+/** 
     try {
       const response = await fetch(`https://travelconnect.com.ar/get_paquete2/${idPaquete}`, {
         method: "GET",
@@ -52,20 +52,31 @@ export const useBusquedaPorCarta = () => {
         setErrorBusqueda("No se encontró el paquete solicitado.");
         return;
       }
+*/
+      let paqStr = localStorage.getItem("paqueteAct");
+      if (!paqStr) {
+        setErrorBusqueda("No se encontró el paquete almacenado.");
+        setLoading(false);
+        return;
+      }
 
-      setPaqueteActivo(dataArr[0]);
-      localStorage.setItem("resultadosBusqueda", JSON.stringify(dataArr));
+      // ✅ Parsear el JSON a objeto
+      const paq = JSON.parse(paqStr) as PaqueteData;
+
+      // ✅ Guardar en estado
+      setPaqueteActivo(paq);
+      localStorage.setItem("resultadosBusqueda", JSON.stringify(Array.isArray(paq)));
       window.dispatchEvent(new Event("actualizarPaquetes"));
 
       if (!window.location.pathname.includes("/paquetes-busqueda")) {
         navigate("/paquetes-busqueda");
       }
-    } catch (error) {
-      console.error("❌ ERROR AL BUSCAR PAQUETE POR ID:", error);
-      setErrorBusqueda("Ocurrió un error al buscar el paquete. Intentalo más tarde.");
-    } finally {
+ //   } catch (error) {
+ //     console.error("❌ ERROR AL BUSCAR PAQUETE POR ID:", error);
+ //     setErrorBusqueda("Ocurrió un error al buscar el paquete. Intentalo más tarde.");
+ //   } finally {
       setLoading(false);
-    }
+ //   }
   };
 
   const limpiarPaqueteActivo = () => setPaqueteActivo(null);
