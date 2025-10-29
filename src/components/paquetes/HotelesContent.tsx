@@ -4,12 +4,13 @@ import { Box, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import Hotel from "./Hotel";
 import type { Hotel as HotelType } from "../../interfaces/Hotel";
+import { HotelDetalle } from "../../interfaces/PaqueteData";
 
 type LegacyHotelItem = { hotel: HotelType };
 
 interface HotelesContentProps {
   /** En PaqueteData puede venir objeto, array o null */
-  hotel?: HotelType | HotelType[] | LegacyHotelItem[] | null;
+  hotel?: HotelDetalle | HotelType[] | LegacyHotelItem[] | null;
   /** Legacy: aún podrían pasarte una lista */
   hoteles?: LegacyHotelItem[];
 }
@@ -34,10 +35,10 @@ const HotelesContent: React.FC<HotelesContentProps> = ({ hotel, hoteles }) => {
       return arr as HotelType[];
     }
 
-    if (hotel) {
+    //if (hotel) {
       // Caso: hotel = { ... } (HotelType)
-      return [hotel as HotelType];
-    }
+     /// return [hotel as HotelType];
+   // }
 
     if (Array.isArray(hoteles) && hoteles.length > 0) {
       // Legacy prop
@@ -56,7 +57,7 @@ const HotelesContent: React.FC<HotelesContentProps> = ({ hotel, hoteles }) => {
     return (
       <Box sx={{ mt: 2, px: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          No hay hoteles disponibles
+          hoteles disponibles
         </Typography>
       </Box>
     );

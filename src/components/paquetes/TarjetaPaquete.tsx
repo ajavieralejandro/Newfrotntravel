@@ -157,7 +157,7 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
   const renderExpansionContent = () => {
     switch (selectedTab) {
       case 0:
-        return <HotelesContent hotel={hoteles} />;
+        return <HotelesContent hotel={hotelesDetalle[0]} />;
       case 1:
         return <DescripcionContent descripcion={paquete.descripcion} />;
       case 2:

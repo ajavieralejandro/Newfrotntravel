@@ -48,7 +48,7 @@ const PaquetesBusqueda = () => {
 
   useEffect(() => {
     if (id) {
-      buscarPorId(Number(id));
+      buscarPorId(id);
       window.scrollTo(0, 0);
     } else {
       limpiarPaqueteActivo();

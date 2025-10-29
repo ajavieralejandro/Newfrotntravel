@@ -27,7 +27,7 @@ const ContenedorCartasMes: React.FC = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const perPage = isMobile ? 4 : 9;
+  const perPage = isMobile ? 4 : 8;
 
   const idAgencia = datosGenerales?.idAgencia;
 

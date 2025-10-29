@@ -75,9 +75,22 @@ export interface Media {
    type: string;
 }
 
+export interface Cordinate {
+   latitude: string,
+   longitude: string;
+}
+
+export interface Location {
+   address: string,
+   city: string;
+   country: string;
+   coordinates : Cordinate
+}
+
 export interface Hotel {
   hotelCode: string,
   medias: Media[];
+  location: Location
 }
 
 export interface ApiResponse {

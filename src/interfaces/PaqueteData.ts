@@ -15,6 +15,15 @@ export interface HotelDetalle {
     refundable: boolean;
   };
   imageUrl?: string[]; // imageUrl o hotels[].media.images[0].url o placeholder
+  location?: {
+    address: string;
+    city: string;
+    country: string;
+    coordinates: {
+      latitude: number;
+      longitude: number;
+    };
+  };
 }
 
 export interface PaqueteData {

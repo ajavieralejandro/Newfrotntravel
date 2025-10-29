@@ -54,50 +54,67 @@ export const obtenerPaquetesDestacadosPaginados = async (
     var paquetes: PaqueteData[] = [];
          // ✅ Mapeamos cada hotel a un PaqueteData
          paquetes  = (apiResp.options ?? []).map((o, index) => {
-          const hotelDetalle: HotelDetalle = {
-            hotelName: o.hotelName ?? "Sin nombre",
-            hotelCode: o.hotelCode ?? "",
-            price: {
-              gross: o.price?.gross ?? 0,
-              currency: o.price?.currency ?? "USD",
-            },
-            roomCode: o.rooms?.[0]?.code ?? undefined,
-            roomDescription: o.rooms?.[0]?.description ?? undefined,
-            boardCode: o.boardCode ?? undefined,
-            cancelPolicy: { refundable: o.cancelPolicy?.refundable ?? false },
-            imageUrl:
-              apiResp.hotels
-                ?.find(h => h.hotelCode === o.hotelCode)
-                ?.medias
-                ?.map(m => m.url) ??
-              ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
-                };
-    
-          return {
-            id: index + 1,
-            titulo: hotelDetalle.hotelName,
-            descripcion: `Alojamiento en ${hotelDetalle.hotelName}`,
-            pais: "",
-            ciudad: "",
-            ciudad_iata: null,
-            fecha_vigencia_desde: "01-11-2025",
-            fecha_vigencia_hasta: "30-11-2025",
-            cant_noches: 1,
-            tipo_producto: "hotel",
-            activo: true,
-            prioridad: "media",
-            imagen_principal: hotelDetalle.imageUrl?.[0] ?? "https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible",
-            edad_menores: 12,
-            transporte: null,
-            tipo_moneda: hotelDetalle.price.currency,
-            descuento: "0",
-            componentes: null,
-            hotel: null,
-            hotelDetalle: [hotelDetalle],
-            galeria_imagenes: hotelDetalle.imageUrl ?? ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
-            salidas: [],
-          };
-        });
+  // Buscamos el hotel correspondiente
+  const hotelMatch = apiResp.hotels?.find(h => h.hotelCode === o.hotelCode);
+
+  const hotelDetalle: HotelDetalle = {
+    hotelName: o.hotelName ?? "Sin nombre",
+    hotelCode: o.hotelCode ?? "",
+    price: {
+      gross: o.price?.gross ?? 0,
+      currency: o.price?.currency ?? "USD",
+    },
+    roomCode: o.rooms?.[0]?.code ?? undefined,
+    roomDescription: o.rooms?.[0]?.description ?? undefined,
+    boardCode: o.boardCode ?? undefined,
+    cancelPolicy: { refundable: o.cancelPolicy?.refundable ?? false },
+    imageUrl:
+      hotelMatch?.medias?.map(m => m.url) ??
+      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
+
+    // ✅ NUEVO: agregamos location correctamente
+    location: hotelMatch
+      ? {
+          address: hotelMatch.location?.address ?? "",
+          city: hotelMatch.location?.city ?? "",
+          country: hotelMatch.location?.country ?? "",
+          coordinates: {
+            latitude: Number(hotelMatch.location?.coordinates?.latitude ?? 0),
+            longitude: Number(hotelMatch.location?.coordinates?.longitude ?? 0),
+          },
+        }
+      : undefined,
+  };
+
+  return {
+    id: index + 1,
+    titulo: hotelDetalle.hotelName,
+    descripcion: `Alojamiento en ${hotelDetalle.hotelName}`,
+    pais: hotelDetalle.location?.country ?? "",
+    ciudad: hotelDetalle.location?.city ?? "",
+    ciudad_iata: null,
+    fecha_vigencia_desde: "01-11-2025",
+    fecha_vigencia_hasta: "30-11-2025",
+    cant_noches: 1,
+    tipo_producto: "hotel",
+    activo: true,
+    prioridad: "media",
+    imagen_principal:
+      hotelDetalle.imageUrl?.[0] ??
+      "https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible",
+    edad_menores: 12,
+    transporte: null,
+    tipo_moneda: hotelDetalle.price.currency,
+    descuento: "0",
+    componentes: null,
+    hotel: null,
+    hotelDetalle: [hotelDetalle],
+    galeria_imagenes:
+      hotelDetalle.imageUrl ??
+      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
+    salidas: [],
+  };
+});
 
 
     return {

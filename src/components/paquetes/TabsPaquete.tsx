@@ -7,7 +7,8 @@ export interface TabsPaqueteProps {
   onTabChange?: (tabIndex: number, expansionOpen: boolean) => void;
 }
 
-const labels = ["Hoteles", "Descripción", "Salidas", "Transporte"];
+//const labels = ["Hoteles", "Descripción", "Salidas", "Transporte"];
+const labels = ["Hotel", "Descripción"];
 
 const TabsPaquete: React.FC<TabsPaqueteProps> = ({ onTabChange }) => {
   const theme = useTheme();

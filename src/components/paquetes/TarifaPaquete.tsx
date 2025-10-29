@@ -1,8 +1,10 @@
+import React from "react";
 import { Box, Typography, Skeleton, Divider } from "@mui/material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { useTarjetas, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
 import BotonConsultar from "./BotonConsultar";
+import MapaFooter from "../../components/footer/MapaFooter"; // ✅ nuevo import
 import type { PaqueteData } from "../../interfaces/PaqueteData";
 
 interface TarifaPaqueteProps {
@@ -14,35 +16,52 @@ interface TarifaPaqueteProps {
   cargando?: boolean;
 }
 
-const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false }: TarifaPaqueteProps) => {
-
-
+const TarifaPaquete = ({
+  tarifa,
+  impuestos,
+  total,
+  wp,
+  divisa,
+  cargando = false,
+}: TarifaPaqueteProps) => {
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
 
-  // 🎨 Colores con fallback
-  const colorPrimario = tarjetas?.color?.primario || datosGenerales?.color?.primario || "#FF9800";
-  const colorTipografia = tarjetas?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#fff";
+  const colorPrimario =
+    tarjetas?.color?.primario ||
+    datosGenerales?.color?.primario ||
+    "#FF9800";
+  const colorTipografia =
+    tarjetas?.tipografiaColor ||
+    datosGenerales?.colorTipografiaAgencia ||
+    "#fff";
 
-  // 💱 Normaliza a código de 3 letras
   const normalizeCurrency = (v?: string | null): string => {
     const s = (v ?? "").toString().trim().toUpperCase();
     if (!s) return "USD";
     if (s.includes("ARS") || s.includes("PESO")) return "ARS";
-    if (s.includes("USD") || s.includes("DOLAR") || s.includes("DÓLAR") || s.includes("U$D") || s.includes("US$")) return "USD";
+    if (
+      s.includes("USD") ||
+      s.includes("DOLAR") ||
+      s.includes("DÓLAR") ||
+      s.includes("U$D") ||
+      s.includes("US$")
+    )
+      return "USD";
     if (/^[A-Z]{3}$/.test(s)) return s;
     return "USD";
   };
 
   const currency = normalizeCurrency(divisa);
 
-  // 🧮 Formateo: sin decimales, miles local "es-AR"
   const formatNumber0 = (n: number | null | undefined): string => {
-    const value = typeof n === "number" && Number.isFinite(n) ? Math.round(n) : 0;
-    return new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(value);
+    const value =
+      typeof n === "number" && Number.isFinite(n) ? Math.round(n) : 0;
+    return new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(
+      value
+    );
   };
 
-  // Muestra: ARS => "$ 1.234"; USD => "USD 1.234"; otras => "XXX 1.234"
   const displayAmount = (n: number | null | undefined): string => {
     const amount = formatNumber0(n);
     if (currency === "ARS") return `$ ${amount}`;
@@ -82,62 +101,43 @@ const TarifaPaquete = ({ tarifa, impuestos, total, wp, divisa, cargando = false 
         </>
       ) : (
         <>
-          {/* Encabezado / Precio principal */}
           <Box sx={{ width: "100%" }}>
-            <Typography variant="body1" fontWeight="bold" sx={{ color: colorTipografia, mb: 2 }}>
+            <Typography
+              variant="body1"
+              fontWeight="bold"
+              sx={{ color: colorTipografia, mb: 2 }}
+            >
               Precio Desde
             </Typography>
 
             {mostrarConsultar ? (
-              <Typography variant="h3" fontWeight="bold" sx={{ color: colorTipografia }}>
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                sx={{ color: colorTipografia }}
+              >
                 Consultar
               </Typography>
             ) : (
-              <Typography variant="h3" fontWeight="bold" sx={{ color: colorTipografia }}>
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                sx={{ color: colorTipografia }}
+              >
                 {total}
               </Typography>
             )}
           </Box>
 
-          {/* Desglose */}
-          { /**** !mostrarConsultar && (
-            <Box sx={{ width: "100%", mt: 4, flexGrow: 1 }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                <MonetizationOnIcon sx={{ color: colorTipografia, mr: 1 }} />
-                <Typography variant="body1" sx={{ color: colorTipografia, flexGrow: 1, textAlign: "left" }}>
-                  Tarifa
-                </Typography>
-                <Typography variant="body1" sx={{ color: colorTipografia, fontWeight: "bold" }}>
-                  {displayAmount(tarifa)}
-                </Typography>
-              </Box>
+          {/* 🗺️ Mapa agregado justo antes del botón */}
+          <MapaFooter
+            latitud={wp?.hotelDetalle?.[0]?.location?.coordinates.latitude}
+            longitud={wp?.hotelDetalle?.[0]?.location?.coordinates.longitude}
+            direccion={wp?.hotelDetalle?.[0]?.location?.address}
+          />
 
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <MonetizationOnIcon sx={{ color: colorTipografia, mr: 1 }} />
-                <Typography variant="body1" sx={{ color: colorTipografia, flexGrow: 1, textAlign: "left" }}>
-                  Impuestos
-                </Typography>
-                <Typography variant="body1" sx={{ color: colorTipografia, fontWeight: "bold" }}>
-                  {displayAmount(impuestos)}
-                </Typography>
-              </Box>
-
-              <Divider sx={{ my: 2, borderColor: "#fff", width: "100%" }} />
-
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <AttachMoneyIcon sx={{ color: colorTipografia, mr: 1 }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: colorTipografia, flexGrow: 1, textAlign: "left" }}>
-                  TOTAL
-                </Typography>
-                <Typography variant="h6" fontWeight="bold" sx={{ color: colorTipografia }}>
-                  {total}
-                </Typography>
-              </Box>
-            </Box>
-          )*/}
-
-          {/* CTA */}
-          <Box sx={{ mt: 4, width: "100%" }}>
+          {/* Botón WhatsApp */}
+          <Box sx={{ mt: 3, width: "100%" }}>
             <BotonConsultar paquete={wp} />
           </Box>
         </>
