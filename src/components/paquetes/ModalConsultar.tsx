@@ -1,15 +1,7 @@
 import { useState } from "react";
 import {
-  Box,
-  Modal,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  Snackbar,
-  Alert,
-  useMediaQuery,
-  useTheme,
+  Box, Modal, Typography, TextField, Button, Grid,
+  Snackbar, Alert, useMediaQuery, useTheme,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import { enviarConsulta } from "../../services/paquetes/consultasYReservasService";
@@ -56,25 +48,29 @@ const ModalConsultar = ({
   };
 
   const validarFormulario = (): boolean => {
-    const nuevosErrores: Partial<typeof formulario> = {};
-    if (!formulario.nombre_apellido.trim()) nuevosErrores.nombre_apellido = "Campo obligatorio";
-    if (!formulario.email.trim()) {
-      nuevosErrores.email = "Campo obligatorio";
-    } else if (!formulario.email.includes("@") || !formulario.email.includes(".")) {
-      nuevosErrores.email = "Email inválido";
-    }
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  };
+  const nuevosErrores: Partial<typeof formulario> = {};
 
-  // 🔧 Mapea errores { "formularioConsulta.email": ["..."] } → { email: "..." }
+  if (!formulario.nombre_apellido.trim()) {
+    nuevosErrores.nombre_apellido = "Campo obligatorio";
+  }
+
+  if (!formulario.email.trim()) {
+    nuevosErrores.email = "Campo obligatorio";
+  } else if (!formulario.email.includes("@") || !formulario.email.includes(".")) {
+    nuevosErrores.email = "Email inválido"; // 👈 aquí estaba el typo
+  }
+
+  setErrores(nuevosErrores);
+  return Object.keys(nuevosErrores).length === 0;
+};
+
+  // Mapea errores { "formularioConsulta.email": ["..."] } → { email: "..." }
   const mapearErroresBackend = (errors: Record<string, string[]>) => {
     const nuevos: Partial<typeof formulario> = {};
     Object.entries(errors).forEach(([k, msgs]) => {
       const msg = msgs?.[0] ?? "Campo inválido";
       if (k.startsWith("formularioConsulta.")) {
         const sub = k.replace("formularioConsulta.", "") as keyof typeof formulario;
-        
         nuevos[sub] = msg;
       } else if (k === "agencia_id" || k === "paquete_id") {
         setAlert({ type: "error", msg });
@@ -183,6 +179,7 @@ const ModalConsultar = ({
 
             <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
               <Button
+                type="button" // ✅ importante: evita submit por defecto (y un GET)
                 variant="contained"
                 disabled={loading}
                 onClick={handleSubmit}
