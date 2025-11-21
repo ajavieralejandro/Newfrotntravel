@@ -127,7 +127,7 @@ const ModalFiltros = ({ open, onClose }: ModalFiltrosProps) => {
 
     for (const p of paquetes) {
       // listas
-      if (p?.ciudad) ciudades.add(String(p.ciudad).trim());
+      //if (p?.ciudad) ciudades.add(String(p.ciudad).trim());
 
       for (const hn of hotelesFromPaquete(p)) hoteles.add(hn);
 

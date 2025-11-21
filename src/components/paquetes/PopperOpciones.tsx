@@ -67,7 +67,7 @@ const PopperOpciones: React.FC<PopperOpcionesProps> = ({
           sx={{ padding: "12px 20px", fontSize: "14px", fontFamily: tipografia, display: "flex", alignItems: "center" }}
         >
           <EventNoteIcon sx={{ marginRight: "10px" }} />
-          Reservar
+          Solicitud de reserva
         </MenuItem>
 
         <MenuItem

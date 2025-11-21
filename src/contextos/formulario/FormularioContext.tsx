@@ -1,188 +1,188 @@
 import React, { createContext, useContext, useState } from "react";
+import { Dayjs } from "dayjs";
 
-// 🔹 Tipo personalizado para viajeros
+// -------------------- Tipos ----------------------
+
 export interface Viajeros {
   adultos: number;
   menores: number;
 }
 
-// 🔹 Interfaz para valores de UI (display values)
 export interface FormularioUI {
   ciudadOrigenDisplay: string;
   destinoDisplay: string;
-  fechaSalidaDisplay: string;
-  viajerosDisplay: string;
-  fechaVueltaDisplay: string;
-  nochesDisplay: string
+
+  // Nuevos campos UI
+  salidaDisplay: string;
+  destinoHotelDisplay: string;
+  fechaEntradaHotelDisplay: string;
+  fechaSalidaHotelDisplay: string;
+  pasajerosDisplay: string;
 }
 
 interface FormularioContextProps {
-  // Estados principales del formulario
-  ciudadOrigen: string;
+  // ----- Campos de vuelos / paquetes -------
+  salida: string;
   destino: string;
-  fechaSalida: Date | null;
-  fechaVuelta: Date | null;
-  noches: string;
-  viajeros: Viajeros;
-  
-  // Estados de UI para sincronización
+  fechaSalidaVuelos: Dayjs | null;
+  pasajeros: Viajeros;
+
+  // ----- Campos de hoteles -------
+  destinoHotel: string;
+  fechaEntradaHotel: Dayjs | null;
+  fechaSalidaHotel: Dayjs | null;
+  noches: number | null;
+
+  // ----- UI values -------
   uiValues: FormularioUI;
-  
-  // Setters principales
-  setCiudadOrigen: (ciudad: string) => void;
-  setDestino: (destino: string) => void;
-  setFechaSalida: (fechaSalida: Date | null) => void;
-  setFechaVuelta: (fechaVuelta: Date | null) => void;
-  setNoches: (noches: string) => void;
-  setViajeros: (viajeros: Viajeros) => void;
-  
-  // Setters de UI
-  setUIValues: (values: Partial<FormularioUI>) => void;
-  
+
+  // ----- Setters -------
+  setSalida: (v: string) => void;
+  setDestino: (v: string) => void;
+  setFechaSalidaVuelos: (v: Dayjs | null) => void;
+  setPasajeros: (v: Viajeros) => void;
+
+  setDestinoHotel: (v: string) => void;
+  setFechaEntradaHotel: (v: Dayjs | null) => void;
+  setFechaSalidaHotel: (v: Dayjs | null) => void;
+  setNoches: (v: number | null) => void;
+
+  setUIValues: (v: Partial<FormularioUI>) => void;
+
   // Validación
   errors: Record<string, string>;
-  isValid: boolean;
-  
+  validateField: (field: string, value: any) => string | null;
+
   // Acciones
+  isValid: boolean;
   enviarFormulario: () => boolean;
   resetFormulario: () => void;
-  validateField: (field: string, value: any) => string | null;
 }
+
+// -------------------------------------------------
 
 const FormularioContext = createContext<FormularioContextProps | undefined>(undefined);
 
 export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Estados principales del formulario
-  const [ciudadOrigen, setCiudadOrigen] = useState<string>("");
+
+  // ---------- Estados vuelos / paquetes ----------
+  const [salida, setSalida] = useState<string>("");
   const [destino, setDestino] = useState<string>("");
-  const [fechaSalida, setFechaSalida] = useState<Date | null>(null);
-  const [fechaVuelta, setFechaVuelta] = useState<Date | null>(null);
-  const [noches, setNoches] = useState<string>("");
-  const [viajeros, setViajeros] = useState<Viajeros>({ adultos: 2, menores: 0 });
-  
-  // Estados de UI para sincronización
+  const [fechaSalidaVuelos, setFechaSalidaVuelos] = useState<Dayjs | null>(null);
+  const [pasajeros, setPasajeros] = useState<Viajeros>({ adultos: 1, menores: 0 });
+
+  // ---------- Estados hoteles ----------
+  const [destinoHotel, setDestinoHotel] = useState("");
+  const [fechaEntradaHotel, setFechaEntradaHotel] = useState<Dayjs | null>(null);
+  const [fechaSalidaHotel, setFechaSalidaHotel] = useState<Dayjs | null>(null);
+  const [noches, setNoches] = useState<number | null>(null);
+
+  // ---------- UI values ----------
   const [uiValues, setUIValuesState] = useState<FormularioUI>({
     ciudadOrigenDisplay: "",
     destinoDisplay: "",
-    fechaSalidaDisplay: "",
-    viajerosDisplay: "",
-    fechaVueltaDisplay: "",
-    nochesDisplay: ""
+    salidaDisplay: "",
+    destinoHotelDisplay: "",
+    fechaEntradaHotelDisplay: "",
+    fechaSalidaHotelDisplay: "",
+    pasajerosDisplay: "",
   });
-  
-  // Estados de validación
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Helper para actualizar UI values
   const setUIValues = (values: Partial<FormularioUI>) => {
     setUIValuesState(prev => ({ ...prev, ...values }));
   };
-  
-  // Validación de campos
+
+  // ---------- Validación ----------
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const validateField = (field: string, value: any): string | null => {
     switch (field) {
-      case 'ciudadOrigen':
-        // Solo validar formato si hay valor
-        if (value && value.trim() !== '' && (!value.includes('(') || !value.includes(')'))) {
-          return 'Seleccione una ciudad válida del menú';
+      case "salida":
+      case "destino":
+      case "destinoHotel":
+        if (value && !value.includes("(")) {
+          return "Seleccione una ubicación válida";
         }
         return null;
-      case 'destino':
-        // Solo validar formato si hay valor
-        if (value && value.trim() !== '' && (!value.includes('(') || !value.includes(')'))) {
-          return 'Seleccione una ciudad válida del menú';
+
+      case "fechaEntradaHotel":
+      case "fechaSalidaHotel":
+      case "fechaSalidaVuelos":
+        if (value && value.isBefore(Dayjs, "day")) {
+          return "La fecha debe ser futura";
         }
         return null;
-      case 'fechaSalida':
-        // Solo validar fecha futura si hay valor
-        if (value && new Date(value) < new Date()) {
-          return 'La fecha debe ser futura';
-        }
-        return null;
-      case 'viajeros':
-        // Viajeros siempre válidos (pueden ser 0)
-        return null;
+
       default:
         return null;
     }
   };
-  
-  // Formulario siempre válido - permitir envío con campos vacíos
+
   const isValid = true;
-  
-  const enviarFormulario = (): boolean => {
-    // Validar solo formato de campos que tienen contenido
-    const newErrors: Record<string, string> = {};
-    
-    const ciudadOrigenError = validateField('ciudadOrigen', ciudadOrigen);
-    if (ciudadOrigenError) newErrors.ciudadOrigen = ciudadOrigenError;
-    
-    const destinoError = validateField('destino', destino);
-    if (destinoError) newErrors.destino = destinoError;
-    
-    const fechaError = validateField('fechaSalida', fechaSalida);
-    if (fechaError) newErrors.fechaSalida = fechaError;
-    
-    const viajerosError = validateField('viajeros', viajeros);
-    if (viajerosError) newErrors.viajeros = viajerosError;
 
-    const fechaVuletaError = validateField('fechaVuelta', fechaVuelta);
-    if (fechaVuletaError) newErrors.fechaVuelta = fechaVuletaError;
-
-    const nochesError = validateField('noches', noches);
-    if (nochesError) newErrors.noches = nochesError;
-    
-    setErrors(newErrors);
-    
-    // Siempre permitir envío, incluso con campos vacíos
-    console.log("Formulario enviado:", { ciudadOrigen, destino, fechaSalida, viajeros, fechaVuelta, noches });
+  const enviarFormulario = () => {
+    setErrors({});
     return true;
   };
 
   const resetFormulario = () => {
-    // Reset de estados principales
-    setCiudadOrigen("");
+    // Vuelos
+    setSalida("");
     setDestino("");
-    setFechaSalida(null);
-    setViajeros({ adultos: 2, menores: 0 });
-    setFechaVuelta(null);
-    setNoches("");
-    // Reset de UI values para sincronización
+    setFechaSalidaVuelos(null);
+    setPasajeros({ adultos: 1, menores: 0 });
+
+    // Hoteles
+    setDestinoHotel("");
+    setFechaEntradaHotel(null);
+    setFechaSalidaHotel(null);
+    setNoches(null);
+
+    // UI
     setUIValues({
       ciudadOrigenDisplay: "",
       destinoDisplay: "",
-      fechaSalidaDisplay: "",
-      viajerosDisplay: "",
-      fechaVueltaDisplay: "",
-      nochesDisplay: ""
+      salidaDisplay: "",
+      destinoHotelDisplay: "",
+      fechaEntradaHotelDisplay: "",
+      fechaSalidaHotelDisplay: "",
+      pasajerosDisplay: "",
     });
-    
-    // Reset de errores
+
     setErrors({});
   };
 
   return (
     <FormularioContext.Provider
       value={{
-        ciudadOrigen,
+        salida,
         destino,
-        fechaSalida,
-        viajeros,
-        fechaVuelta,
+        fechaSalidaVuelos,
+        pasajeros,
+
+        destinoHotel,
+        fechaEntradaHotel,
+        fechaSalidaHotel,
         noches,
+
         uiValues,
-        setCiudadOrigen,
+        setSalida,
         setDestino,
-        setFechaSalida,
-        setViajeros,
-        setFechaVuelta,
+        setFechaSalidaVuelos,
+        setPasajeros,
+
+        setDestinoHotel,
+        setFechaEntradaHotel,
+        setFechaSalidaHotel,
         setNoches,
+
         setUIValues,
+
         errors,
+        validateField,
         isValid,
         enviarFormulario,
         resetFormulario,
-        validateField,
       }}
     >
       {children}
@@ -191,9 +191,7 @@ export const FormularioProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 };
 
 export const useFormulario = () => {
-  const context = useContext(FormularioContext);
-  if (!context) {
-    throw new Error("useFormulario debe ser usado dentro de un FormularioProvider");
-  }
-  return context;
+  const ctx = useContext(FormularioContext);
+  if (!ctx) throw new Error("useFormulario debe ser usado dentro del FormularioProvider");
+  return ctx;
 };

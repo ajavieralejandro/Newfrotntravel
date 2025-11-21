@@ -7,10 +7,15 @@ export interface TabsPaqueteProps {
   onTabChange?: (tabIndex: number, expansionOpen: boolean) => void;
 }
 
-//const labels = ["Hoteles", "Descripción", "Salidas", "Transporte"];
-const labels = ["Hotel", "Descripción"];
 
+//
 const TabsPaquete: React.FC<TabsPaqueteProps> = ({ onTabChange }) => {
+  let labels = ["Hoteles", "Descripción", "Salidas", "Transporte"];
+    const pestanaActual = localStorage.getItem("pestanaActiva") || "paquetes";
+   if (pestanaActual=="hoteles"){
+    labels = ["Hotel", "Descripción"];
+   }
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));

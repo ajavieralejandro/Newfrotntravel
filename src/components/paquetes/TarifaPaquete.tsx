@@ -1,10 +1,6 @@
-import React from "react";
 import { Box, Typography, Skeleton, Divider } from "@mui/material";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { useTarjetas, useDatosGenerales } from "../../contextos/agencia/DatosAgenciaContext";
 import BotonConsultar from "./BotonConsultar";
-//import MapaFooter from "../../components/footer/MapaFooter"; // ✅ nuevo import
 import type { PaqueteData } from "../../interfaces/PaqueteData";
 
 interface TarifaPaqueteProps {

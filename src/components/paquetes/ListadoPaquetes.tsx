@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Grid, Box, CircularProgress, Button } from "@mui/material";
 import TarjetaPaquete from "./TarjetaPaquete";
+import TarjetaPaqueteOriginal from "./TarjetaPaqueteOriginal";
 import MensajeSinPaquetes from "./MensajeSinPaquetes";
 import { useTarjetas } from "../../contextos/agencia/DatosAgenciaContext";
 import { useFiltrosYOrdenamiento } from "../../contextos/filtro/FiltrosYOrdenamientoContext";
@@ -64,6 +65,12 @@ const ListadoPaquetes: React.FC<ListadoPaquetesProps> = ({ paquetes: paquetesPro
   const listaBase = paquetesProp ?? paquetes;
   const listaFiltrada = paquetesProp ? listaBase : filtrarPaquetes(listaBase, filtros);
   const listaFinal = usePaquetesOrdenados(listaFiltrada);
+  const pestanaActual = localStorage.getItem("pestanaActiva") || "paquetes";
+  let modo = "paquetes"
+  if (pestanaActual=="hoteles"){
+    modo = "hoteles"
+  }
+ 
 
   return (
     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "left" }}>
@@ -85,7 +92,11 @@ const ListadoPaquetes: React.FC<ListadoPaquetesProps> = ({ paquetes: paquetesPro
                 key={paquete.id}
                 sx={{ display: "flex", justifyContent: "left", mb: index !== listaFinal.length - 1 ? { xs: 2, sm: 3, md: 3 } : 0 }}
               >
-                <TarjetaPaquete paquete={paquete} cargando={false} />
+                {
+                   (modo === "hoteles") ?(<TarjetaPaquete paquete={paquete} cargando={false} />) 
+                   : ( <TarjetaPaqueteOriginal paquete={paquete} cargando={false} />) 
+                }
+                
               </Grid>
             ))}
           </Grid>

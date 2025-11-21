@@ -3,27 +3,38 @@ import { useNavigate } from "react-router-dom";
 import { useFormulario } from "../contextos/formulario/FormularioContext";
 import { useDatosAgencia } from "../contextos/agencia/DatosAgenciaContext";
 import type { HotelDetalle, PaqueteData } from "../interfaces/PaqueteData";
-import type { PaqueteDataNew } from "../interfaces/PaqueteDataNew";
 import type { ApiResponse } from "../interfaces/ApiResponse";
 import { Countries } from "../interfaces/Countries";
-
+import type { Dayjs } from "dayjs";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ??
   "https://travelconnect.com.ar/tgx/search";
 
+const API_BASE_URL_PAQUETE = 
+import.meta.env.VITE_API_URL ?? 
+"https://travelconnect.com.ar";
+
 export const useBusqueda = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const {
-    ciudadOrigen,
-    destino,
-    fechaSalida,
-    viajeros, // { adultos, menores }
-    fechaVuelta,
-    noches,
-    resetFormulario,
-  } = useFormulario();
+const {
+  salida: ciudadOrigen,        
+  destino,
+  fechaSalidaVuelos: fechaSalida, 
+  pasajeros: viajeros,            
+  fechaSalidaHotel: fechaVuelta,  
+  
+  noches,
+  destinoHotel,
+  fechaEntradaHotel,
+  fechaSalidaHotel,
+  
+
+
+
+  resetFormulario,
+} = useFormulario();
   const { datosAgencia } = useDatosAgencia();
 
   const guardarValoresPrevios = () => {
@@ -42,9 +53,6 @@ export const useBusqueda = () => {
 
   function parseCiudadPais(input: string) {
   // Expresión regular para capturar:
-  // 1️⃣ Ciudad antes del guion
-  // 2️⃣ País después del guion y antes del paréntesis
-  // 3️⃣ Código opcional entre paréntesis
   const regex = /^(.+?)\s*-\s*(.+?)\s*\((\w{3})\)?$/;
 
   const match = input.trim().match(regex);
@@ -65,9 +73,10 @@ export const useBusqueda = () => {
   };
 }
 
-function formatearFecha(fecha: Date): string {
-  // Convierte la fecha a ISO y toma solo la parte YYYY-MM-DD
-  return fecha.toISOString().split("T")[0];
+function formatearFecha(fecha: Date | Dayjs | null): string {
+  if (fecha === null) return ""
+  const d = fecha instanceof Date ? fecha : fecha.toDate();
+  return d.toISOString().split("T")[0];
 }
 
 function getCountryCode(countryName: string): string | undefined {
@@ -77,23 +86,19 @@ function getCountryCode(countryName: string): string | undefined {
   return found?.code;
 }
   const handleClick = async () => {
-     if (!destino) {
-      alert("Por favor, ingresá un destino antes de buscar.");
-      return;
-    }
 
     setLoading(true);
 
-          const country = parseCiudadPais(destino).pais
-      const city = parseCiudadPais(destino).ciudad
+          const country = parseCiudadPais(destinoHotel).pais
+      const city = parseCiudadPais(destinoHotel).ciudad
 
       const selected = Countries.find(c => c.name === country);
 
       const queryParams = new URLSearchParams({
         country: getCountryCode(country) ?? "",
-        city: city,
-        check_in: fechaSalida ? formatearFecha(fechaSalida) : "",
-        check_out: fechaVuelta ? formatearFecha(fechaVuelta) : "",
+        city: city, 
+        check_in: fechaSalida ? formatearFecha(fechaEntradaHotel) : "",
+        check_out: fechaVuelta ? formatearFecha(fechaSalidaHotel) : "",
         ages: "",
         //ages: Array(viajeros.adultos)
          // .fill(30)
@@ -119,8 +124,10 @@ function getCountryCode(countryName: string): string | undefined {
       agencia_id: datosAgencia?.idAgencia,
     };
 
-    console.log("📤 Enviando solicitud con los siguientes datos:", payload);
-
+    console.log(" Enviando solicitud con los siguientes datos:", payload);
+    const pestanaActual = localStorage.getItem("pestanaActiva") || "paquetes";
+   if (pestanaActual=="hoteles"){
+    
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -130,113 +137,138 @@ function getCountryCode(countryName: string): string | undefined {
 
       const rawData = await response.json();
       console.log("wahtaaa" , rawData)
-
-       // ✅ Cast seguro
-    // const paquetes: ApiResponse = rawData as ApiResponse;
-
       var paquetes: PaqueteData[] = [];
 
       if (response.status === 502) {
-        console.warn("⚠️ No se encontraron paquetes para la búsqueda.");
+        console.warn(" No se encontraron paquetes para la búsqueda.");
         paquetes = [];
       } else if (!response.ok) {
         throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-      } else {
-        //paquetes = (await response.json()) as PaqueteDataNew[];
-      }
+      } 
 
-     // console.log("📦 Paquetes recibidos:", paquetes);
+      const apiResp = rawData as ApiResponse;
 
+        //  Mapeamos cada hotel a un PaqueteData
+      paquetes = (apiResp.options ?? []).map((o, index) => {
+       // Buscamos el hotel correspondiente
+      const hotelMatch = apiResp.hotels?.find(h => h.hotelCode === o.hotelCode);
 
+      const hotelDetalle: HotelDetalle = {
+        hotelName: o.hotelName ?? "Sin nombre",
+        hotelCode: o.hotelCode ?? "",
+        price: {
+          gross: o.price?.gross ?? 0,
+          currency: o.price?.currency ?? "USD",
+        },
+        roomCode: o.rooms?.[0]?.code ?? undefined,
+        roomDescription: o.rooms?.[0]?.description ?? undefined,
+        boardCode: o.boardCode ?? undefined,
+        cancelPolicy: { refundable: o.cancelPolicy?.refundable ?? false },
+        imageUrl:
+          hotelMatch?.medias?.map(m => m.url) ??
+          ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
 
-          // casteo seguro a la interfaz que modela la respuesta del API
-    const apiResp = rawData as ApiResponse;
+        //  NUEVO: agregamos location correctamente
+        location: hotelMatch
+          ? {
+              address: hotelMatch.location?.address ?? "",
+              city: hotelMatch.location?.city ?? "",
+              country: hotelMatch.location?.country ?? "",
+              coordinates: {
+                latitude: Number(hotelMatch.location?.coordinates?.latitude ?? 0),
+                longitude: Number(hotelMatch.location?.coordinates?.longitude ?? 0),
+              },
+            }
+          : undefined,
+      };
 
-     // ✅ Mapeamos cada hotel a un PaqueteData
- paquetes = (apiResp.options ?? []).map((o, index) => {
-  // Buscamos el hotel correspondiente
-  const hotelMatch = apiResp.hotels?.find(h => h.hotelCode === o.hotelCode);
-
-  const hotelDetalle: HotelDetalle = {
-    hotelName: o.hotelName ?? "Sin nombre",
-    hotelCode: o.hotelCode ?? "",
-    price: {
-      gross: o.price?.gross ?? 0,
-      currency: o.price?.currency ?? "USD",
-    },
-    roomCode: o.rooms?.[0]?.code ?? undefined,
-    roomDescription: o.rooms?.[0]?.description ?? undefined,
-    boardCode: o.boardCode ?? undefined,
-    cancelPolicy: { refundable: o.cancelPolicy?.refundable ?? false },
-    imageUrl:
-      hotelMatch?.medias?.map(m => m.url) ??
-      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
-
-    // ✅ NUEVO: agregamos location correctamente
-    location: hotelMatch
-      ? {
-          address: hotelMatch.location?.address ?? "",
-          city: hotelMatch.location?.city ?? "",
-          country: hotelMatch.location?.country ?? "",
-          coordinates: {
-            latitude: Number(hotelMatch.location?.coordinates?.latitude ?? 0),
-            longitude: Number(hotelMatch.location?.coordinates?.longitude ?? 0),
-          },
-        }
-      : undefined,
-  };
-
-  return {
-    id: index + 1,
-    titulo: hotelDetalle.hotelName,
-    descripcion: `Alojamiento en ${hotelDetalle.hotelName}`,
-    pais: hotelDetalle.location?.country ?? "",
-    ciudad: hotelDetalle.location?.city ?? "",
-    ciudad_iata: null,
-    fecha_vigencia_desde: "01-11-2025",
-    fecha_vigencia_hasta: "30-11-2025",
-    cant_noches: 1,
-    tipo_producto: "hotel",
-    activo: true,
-    prioridad: "media",
-    imagen_principal:
-      hotelDetalle.imageUrl?.[0] ??
-      "https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible",
-    edad_menores: 12,
-    transporte: null,
-    tipo_moneda: hotelDetalle.price.currency,
-    descuento: "0",
-    componentes: null,
-    hotel: null,
-    hotelDetalle: [hotelDetalle],
-    galeria_imagenes:
-      hotelDetalle.imageUrl ??
-      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
-    salidas: [],
-  };
-});
-
-
-
-
-
-
-
-
+      return {
+        id: index + 1,
+        titulo: hotelDetalle.hotelName,
+        descripcion: `Alojamiento en ${hotelDetalle.hotelName}`,
+        pais: hotelDetalle.location?.country ?? "",
+        ciudad: hotelDetalle.location?.city ?? "",
+        ciudad_iata: null,
+        fecha_vigencia_desde: "01-11-2025",
+        fecha_vigencia_hasta: "30-11-2025",
+        cant_noches: 1,
+        tipo_producto: "hotel",
+        activo: true,
+        prioridad: "media",
+        imagen_principal:
+          hotelDetalle.imageUrl?.[0] ??
+          "https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible",
+        edad_menores: 12,
+        transporte: null,
+        tipo_moneda: hotelDetalle.price.currency,
+        descuento: "0",
+        componentes: null,
+        hotel: null,
+        hotelDetalle: [hotelDetalle],
+        galeria_imagenes:
+          hotelDetalle.imageUrl ??
+          ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
+        salidas: [],
+      };
+    });
 
       localStorage.setItem("resultadosBusqueda", JSON.stringify(paquetes));
-      // ✅ Guardar valores ANTES del reset para persistir la última búsqueda
+      //  Guardar valores ANTES del reset para persistir la última búsqueda
+
       guardarValoresPrevios();
       window.dispatchEvent(new Event("actualizarPaquetes"));
       navigate("/paquetes-busqueda");
-      // ✅ Reset DESPUÉS de guardar y navegar
-      resetFormulario();
+      //  Reset DESPUÉS de guardar y navegar
+     // resetFormulario();
+      localStorage.setItem("pestanaActiva", pestanaActual);
+
     } catch (error) {
-      console.error("❌ Error en la búsqueda:", error);
+      console.error(" Error en la búsqueda:", error);
       alert("Hubo un error en la búsqueda. Por favor, intenta nuevamente.");
     } finally {
       setLoading(false);
     }
+
+  }
+  else{
+ try {
+  
+      console.log("📤 Enviando solicitud con los siguientes datos:", payload);
+
+      const response = await fetch(`${API_BASE_URL_PAQUETE}/importar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        
+      });
+
+      let paquetes: PaqueteData[] = [];
+
+      if (response.status === 404) {
+        console.warn("No se encontraron paquetes para la búsqueda.");
+        paquetes = [];
+      } else if (!response.ok) {
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      } else {
+        paquetes = (await response.json()) as PaqueteData[];
+      }
+
+      console.log("Paquetes recibidos:", paquetes);
+
+      localStorage.setItem("resultadosBusqueda", JSON.stringify(paquetes));
+      guardarValoresPrevios();
+      window.dispatchEvent(new Event("actualizarPaquetes"));
+      navigate("/paquetes-busqueda");
+      // Reset DESPUÉS de guardar y navegar
+      //resetFormulario();
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+      alert("Hubo un error en la búsqueda. Por favor, intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   };
 
   return { loading, handleClick };

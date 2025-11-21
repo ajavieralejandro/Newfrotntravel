@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Backdrop, CircularProgress } from "@mui/material";
-import { PaqueteData} from "../../../interfaces/PaqueteData";
+import { PaqueteData } from "../../../interfaces/PaqueteData";
 import {
   useTarjetas,
   useDatosGenerales,
@@ -26,9 +26,7 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
     datosGenerales?.tipografiaAgencia ||
     "'Poppins', sans-serif";
 
-  // 🔥 Ahora forzamos fondo blanco para coherencia de lectura
   const colorFondo = "#FFFFFF";
-
   const colorSecundario =
     tarjetas?.color?.secundario ||
     datosGenerales?.color?.secundario ||
@@ -40,8 +38,6 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
     navigate(`/paquetes-busqueda/${paquete.id}`);
   };
 
- const precio = paquete?.hotelDetalle!![0].price.gross
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,6 +48,9 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
       <Card
         onClick={handleClick}
         sx={{
+              pointerEvents: "auto", // 🔹 Asegura que no se bloquee internamente
+    zIndex: 10,            // 🔹 Por si hay overlays
+    position: "relative",
           width: "100%",
           height: "100%",
           maxWidth: "100%",
@@ -70,7 +69,6 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
           flexDirection: "column",
           border: "none",
           outline: "none",
-          position: "relative",
           overflow: "hidden",
           boxSizing: "border-box",
         }}
@@ -87,10 +85,11 @@ const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
           cargando={false}
         />
 
+        {/* 👇 Sin onClick */}
         <CartaMesPrecio
-           precio={Number(paquete?.hotelDetalle!![0].price.gross ?? 0)}
+          precio={Number(paquete?.hotelDetalle?.[0]?.price?.gross ?? 0)}
           moneda={paquete.tipo_moneda || "ARS"}
-          wp = {paquete}
+          wp={paquete}
         />
 
         <Backdrop

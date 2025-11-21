@@ -14,7 +14,7 @@ import type { HotelDetalle, PaqueteData } from "../../interfaces/PaqueteData";
 import type { Salida } from "../../interfaces/Salida";
 import type { Hotel } from "../../interfaces/Hotel";
 
-type TarjetaPaqueteProps = {
+type TarjetaPaqueteOriginalProps = {
   paquete: PaqueteData;
   cargando?: boolean;
 };
@@ -36,7 +36,7 @@ const derivarTipoTransporte = (
   return "sin_transporte";
 };
 
-const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = false }) => {
+const TarjetaPaqueteOriginal: React.FC<TarjetaPaqueteOriginalProps> = ({ paquete, cargando = false }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const tarjetas = useTarjetas();
@@ -86,24 +86,27 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
     tiposTransporteUnicos,
     tipoTransporteDerivado,
   } = useMemo(() => {
-    const _salidaBase: Salida | undefined = paquete.salidas?.[0];
+   const _salidaBase: Salida | undefined = paquete.salidas?.[0];
     const _fechaSalida = _salidaBase?.fecha_viaje || "Fecha no disponible";
 
     // ✅ Duración robusta: "Consultar" si no hay noches; "Full day / sin alojamiento" si 0
     const noches = paquete.cant_noches as number | null | undefined;
     let _duracion: string;
-    if (hotelesDetalle[0]?.cancelPolicy?.refundable) {
-      _duracion = "Reembolsable";
+    if (noches === 0) {
+      _duracion = "Full day / sin alojamiento";
+    } else if (noches == null || Number.isNaN(noches)) {
+      _duracion = "Consultar";
     } else {
-      _duracion = "No reembolsable";
+      _duracion = `${noches} noche${noches === 1 ? "" : "s"}`;
     }
 
     const _destinos = [paquete.ciudad, paquete.pais].filter(Boolean).join(", ") || "Destino no disponible";
-    const _regimen = hotelesDetalle[0]?.roomCode || hotelesDetalle[0]?.roomDescription || "";
-    const _imagen = hotelesDetalle[0]?.imageUrl?.[0] || "/imagenes/default-image.jpg";
+    const _regimen = "Según Itinerario";
+    const _imagen = paquete.imagen_principal || "/imagenes/default-image.jpg";
+
     const _tarifa = toNum(_salidaBase?.doble_precio);
     const _impuestos = toNum(_salidaBase?.doble_impuesto);
-    const _total = hotelesDetalle[0]?.price.currency + hotelesDetalle[0]?.price.gross;
+    const _total = _tarifa + _impuestos;
 
     const deSalidas = (paquete.salidas ?? [])
       .map((s) => s?.tipo_transporte)
@@ -150,14 +153,14 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
       total={totalBase}
       wp={paquete}
       cargando={cargando}
-      modo = "hotel"
+      modo = "paquete"
     />
   );
 
   const renderExpansionContent = () => {
     switch (selectedTab) {
       case 0:
-        return <HotelesContent hotel={hotelesDetalle[0]} />;
+        return <HotelesContent hotel={hoteles} />;
       case 1:
         return <DescripcionContent descripcion={paquete.descripcion} />;
       case 2:
@@ -267,4 +270,4 @@ const TarjetaPaquete: React.FC<TarjetaPaqueteProps> = ({ paquete, cargando = fal
   );
 };
 
-export default TarjetaPaquete;
+export default TarjetaPaqueteOriginal;

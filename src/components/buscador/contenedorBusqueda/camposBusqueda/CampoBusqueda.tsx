@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { Box, TextField, Typography, ClickAwayListener } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { useBuscador, useDatosGenerales } from "../../../../contextos/agencia/DatosAgenciaContext";
-import { useFormulario } from "../../../../contextos/formulario/FormularioContext";
 import { obtenerUbicaciones } from "../../../../services/comunes/ubicacionesService";
 import PopperUbicaciones from "./campoDestino/PopperUbicaciones";
+import { useBuscador, useDatosGenerales } from "../../../../contextos/agencia/DatosAgenciaContext";
 
-interface UbicacionIATA { codigo: string; nombre: string; }
-interface CampoBusquedaProps { label: "salida" | "destino"; }
+interface UbicacionIATA {
+  codigo: string;
+  nombre: string;
+}
+
+interface CampoBusquedaProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  font?: string;
+  textColor?: string;
+  underlineColor?: string;
+  focusColor?: string;
+}
 
 const INPUT_HEIGHT = 36;
+
 const makeInputSx = (text: string, underline: string, focus: string, font: string) => ({
   backgroundColor: "transparent",
   borderRadius: 0,
@@ -29,7 +41,6 @@ const makeInputSx = (text: string, underline: string, focus: string, font: strin
     padding: 0,
     fontSize: "0.95rem",
   },
-  "& .MuiInputBase-input::placeholder": { color: text, opacity: 0.65 },
   "& .MuiFormHelperText-root": {
     minHeight: 18,
     fontSize: "0.72rem",
@@ -38,64 +49,66 @@ const makeInputSx = (text: string, underline: string, focus: string, font: strin
   },
 });
 
-const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
-  const buscador = useBuscador();
-  const datosGenerales = useDatosGenerales();
-  const { ciudadOrigen, destino, setCiudadOrigen, setDestino, uiValues, setUIValues, errors, validateField } = useFormulario();
-
+const CampoBusqueda: React.FC<CampoBusquedaProps> = ({
+  label,
+  value,
+  onChange,
+  font = "Poppins, sans-serif",
+  textColor = "#000",
+  underlineColor = "#a73439",
+  focusColor = "white",
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [opcionesFiltradas, setOpcionesFiltradas] = useState<UbicacionIATA[]>([]);
+  const [localValue, setLocalValue] = useState(value || "");
 
-  const isOrigin = label === "destino";
-  const displayValue = isOrigin ? uiValues.ciudadOrigenDisplay : uiValues.destinoDisplay;
-  const inputValue = displayValue ?? "";
-  const fieldError = isOrigin ? errors.ciudadOrigen : errors.destino;
-
-  const text =
-    buscador?.inputColor || buscador?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#000";
-  const font = buscador?.tipografia || datosGenerales?.tipografiaAgencia || "Poppins, sans-serif";
+  const buscador = useBuscador();
+  const datosGenerales = useDatosGenerales();
+  const tipografia =
+      buscador?.tipografia || datosGenerales?.tipografiaAgencia || "Verdana, sans-serif";
   const underline = buscador?.color?.primario || datosGenerales?.color?.primario || "#a73439";
-  const focus = buscador?.color?.terciario || datosGenerales?.color?.terciario || "#e52822";
 
-  // Restaurar una vez
+  // Mantener valor local sincronizado con prop
   useEffect(() => {
-    const valores = localStorage.getItem("valoresPrevios");
-    const yaHayValor = isOrigin ? ciudadOrigen : destino;
-    const yaHayDisplay = isOrigin ? uiValues.ciudadOrigenDisplay : uiValues.destinoDisplay;
-    if (!yaHayValor && !yaHayDisplay && valores) {
-      const { ciudadOrigen: gO, destino: gD } = JSON.parse(valores);
-      if (isOrigin && gO) { setCiudadOrigen(gO); setUIValues({ ciudadOrigenDisplay: gO }); }
-      else if (!isOrigin && gD) { setDestino(gD); setUIValues({ destinoDisplay: gD }); }
-    } else if (yaHayValor && !yaHayDisplay) {
-      if (isOrigin) setUIValues({ ciudadOrigenDisplay: yaHayValor });
-      else setUIValues({ destinoDisplay: yaHayValor });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setLocalValue(value);
+  }, [value]);
 
-  // Filtrado async correcto
+  // Filtrado de opciones
   useEffect(() => {
     let cancel = false;
     const run = async () => {
-      if (!inputValue) return setOpcionesFiltradas([]);
+      if (!localValue) return setOpcionesFiltradas([]);
       try {
-        const opts = await obtenerUbicaciones(inputValue);
+        const opts = await obtenerUbicaciones(localValue);
         if (!cancel) setOpcionesFiltradas(opts || []);
-      } catch { if (!cancel) setOpcionesFiltradas([]); }
+      } catch {
+        if (!cancel) setOpcionesFiltradas([]);
+      }
     };
     run();
     return () => { cancel = true; };
-  }, [inputValue]);
+  }, [localValue]);
 
-  if (!datosGenerales) return null;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalValue(e.target.value);
+    onChange(e.target.value);
+    setOpen(true);
+  };
+
+  const handleSelect = (u: UbicacionIATA) => {
+    const valor = `${u.nombre} (${u.codigo})`;
+    setLocalValue(valor);
+    onChange(valor);
+    setOpen(false);
+  };
 
   return (
     <ClickAwayListener onClickAway={() => setOpen(false)}>
-      <Box display="flex" flexDirection="column" gap={0.75} alignItems="flex-start" width="100%">
+      <Box display="flex" flexDirection="column" gap={0.75} width="100%">
         <Box display="flex" alignItems="center" gap={0.75}>
           <LocationOnIcon sx={{ color: underline, fontSize: 20 }} />
-          <Typography sx={{ color: "#000", fontWeight: 500, fontFamily: font, fontSize: "1rem" }}>
+          <Typography sx={{ color: textColor, fontWeight: 500, fontFamily: tipografia, fontSize: "1rem" }}>
             {label}
           </Typography>
         </Box>
@@ -103,42 +116,23 @@ const CampoBusqueda: React.FC<CampoBusquedaProps> = ({ label }) => {
         <TextField
           fullWidth
           variant="standard"
-          placeholder={isOrigin ? "Ingresa Origen" : "Ingresa Destino"}
-          value={inputValue}
-          error={Boolean(fieldError)}
-          helperText={fieldError || " "}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (isOrigin) setUIValues({ ciudadOrigenDisplay: v });
-            else setUIValues({ destinoDisplay: v });
-            setDestino(v);
-            console.log("acccc1" + isOrigin)
-          }}
-          onFocus={(e) => { setAnchorEl(e.currentTarget); setOpen(true); }}
-          onBlur={() => {
-            const v = isOrigin ? ciudadOrigen : destino;
-            if (v) validateField(isOrigin ? "ciudadOrigen" : "destino", v);
-          }}
+          placeholder={`Ingresa ${label}`}
+          value={localValue}
+          onChange={handleChange}
+          onFocus={(e) => setAnchorEl(e.currentTarget)}
           size="small"
-          sx={makeInputSx(text, underline, focus, font)}
+          sx={makeInputSx(textColor, underline, focusColor, tipografia)}
         />
 
         <PopperUbicaciones
           open={open}
           anchorEl={anchorEl}
           opcionesFiltradas={opcionesFiltradas}
-          handleSelect={(u) => {
-            const valor = `${u.nombre} (${u.codigo})`;
-            if (isOrigin) { setCiudadOrigen(valor); setUIValues({ ciudadOrigenDisplay: valor }); }
-            else { setDestino(valor); setUIValues({ destinoDisplay: valor }); }
-            setOpen(false);
-            setDestino(valor);
-            console.log("acccc2" + isOrigin)
-          }}
+          handleSelect={handleSelect}
           label={label}
           colorPrimario={underline}
-          tipografia={font}
-          colorTerciario={focus}
+          colorTerciario={focusColor}
+          tipografia={tipografia}
         />
       </Box>
     </ClickAwayListener>

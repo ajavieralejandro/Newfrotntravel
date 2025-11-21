@@ -34,45 +34,58 @@ const makeInputSx = (text: string, underline: string, focus: string, font: strin
   },
 });
 
-interface CampoPasajerosProps { label: string; }
+// ✅ AHORA EL TIPO ES CORRECTO
+interface CampoPasajerosProps {
+  label: string;
+  value: { adultos: number; menores: number };
+  onChange: (value: { adultos: number; menores: number }) => void;
+}
 
 const CampoPasajeros: React.FC<CampoPasajerosProps> = ({ label }) => {
   const buscador = useBuscador();
   const datosGenerales = useDatosGenerales();
-  const { viajeros, setViajeros, uiValues, setUIValues, errors } = useFormulario();
+
+  // 🔥  Esto viene de tu formulario y SIEMPRE es {adultos, menores}
+  const { pasajeros, setPasajeros, uiValues, setUIValues, errors } = useFormulario();
+
   const [modalAbierto, setModalAbierto] = useState(false);
 
-  const text =
-    buscador?.inputColor || buscador?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#000";
+  const text = buscador?.inputColor || buscador?.tipografiaColor || datosGenerales?.colorTipografiaAgencia || "#000";
   const font = buscador?.tipografia || datosGenerales?.tipografiaAgencia || "Poppins, sans-serif";
   const underline = buscador?.color?.primario || datosGenerales?.color?.primario || "#a73439";
   const focus = buscador?.color?.terciario || datosGenerales?.color?.terciario || "#e52822";
 
+  // Cargar valores guardados
   useEffect(() => {
     const valoresGuardados = localStorage.getItem("valoresPrevios");
-    if (valoresGuardados && (!viajeros || (viajeros.adultos === 0 && viajeros.menores === 0))) {
-      const { viajeros: vg } = JSON.parse(valoresGuardados);
-      if (vg) {
-        setViajeros(vg);
-        const resumen = `${vg.adultos || 0} adulto${vg.adultos === 1 ? "" : "s"}${vg.menores ? ` y ${vg.menores} menor${vg.menores === 1 ? "" : "es"}` : ""}`;
-        setUIValues({ viajerosDisplay: resumen });
+    if (valoresGuardados && pasajeros.adultos === 0 && pasajeros.menores === 0) {
+      const { pasajeros: saved } = JSON.parse(valoresGuardados);
+      if (saved) {
+        setPasajeros(saved);
+        const resumen = `${saved.adultos} adulto${saved.adultos === 1 ? "" : "s"}${
+          saved.menores ? ` y ${saved.menores} menor${saved.menores === 1 ? "" : "es"}` : ""
+        }`;
+        setUIValues({ pasajerosDisplay: resumen });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Actualizar display
   useEffect(() => {
-    const resumen = viajeros?.adultos || viajeros?.menores
-      ? `${viajeros.adultos || 0} adulto${viajeros.adultos === 1 ? "" : "s"}${viajeros.menores ? ` y ${viajeros.menores} menor${viajeros.menores === 1 ? "" : "es"}` : ""}`
-      : "";
-    setUIValues({ viajerosDisplay: resumen });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viajeros]);
+    const resumen =
+      pasajeros.adultos || pasajeros.menores
+        ? `${pasajeros.adultos} adulto${pasajeros.adultos === 1 ? "" : "s"}${
+            pasajeros.menores ? ` y ${pasajeros.menores} menor${pasajeros.menores === 1 ? "" : "es"}` : ""
+          }`
+        : "";
+
+    setUIValues({ pasajerosDisplay: resumen });
+  }, [pasajeros]);
 
   if (!datosGenerales) return null;
 
-  const resumen = uiValues.viajerosDisplay || "";
-  const fieldError = errors.viajeros;
+  const resumen = uiValues.pasajerosDisplay || "";
+  const fieldError = errors.pasajeros;
 
   return (
     <Box display="flex" flexDirection="column" gap={0.75}>
@@ -99,7 +112,10 @@ const CampoPasajeros: React.FC<CampoPasajerosProps> = ({ label }) => {
       <ModalViajeros
         open={modalAbierto}
         onClose={() => setModalAbierto(false)}
-        onAplicar={(adultos, menores) => { setViajeros({ adultos, menores }); setModalAbierto(false); }}
+        onAplicar={(adultos, menores) => {
+          setPasajeros({ adultos, menores });
+          setModalAbierto(false);
+        }}
       />
     </Box>
   );

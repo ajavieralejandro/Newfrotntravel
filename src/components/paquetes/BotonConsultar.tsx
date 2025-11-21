@@ -107,7 +107,7 @@ const BotonConsultar = ({ tipografia = "Arial", paquete }: BotonConsultarProps) 
             }}
           />
         ) : (
-          opcionSeleccionada
+         (opcionSeleccionada === "reservar") ? "Solicitud Reserva" : opcionSeleccionada
         )}
       </Button>
 

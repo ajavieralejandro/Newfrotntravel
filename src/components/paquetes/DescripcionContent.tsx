@@ -16,6 +16,9 @@ const DescripcionContent: React.FC<DescripcionContentProps> = ({ descripcion }) 
   const colorPrimario = tarjetas?.color?.primario || "#1976d2";
   const colorTexto = tarjetas?.tipografiaColorContenido || "#333";
 
+  const pestanaActual = localStorage.getItem("pestanaActiva")
+  const descrip = pestanaActual === "hoteles" ? "Hotel" : "Paquete"
+
   const descripcionProcesada = useMemo(() => {
     if (!descripcion) return null;
 
@@ -62,7 +65,7 @@ const DescripcionContent: React.FC<DescripcionContentProps> = ({ descripcion }) 
               fontSize: "1.25rem",
             }}
           >
-            Descripción del paquete
+            Descripción del {descrip}
           </Typography>
 
           {descripcionProcesada ? (

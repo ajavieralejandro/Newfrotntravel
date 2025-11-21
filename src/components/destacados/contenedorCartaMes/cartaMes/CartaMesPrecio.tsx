@@ -104,7 +104,18 @@ const CartaMesPrecio: React.FC<CartaMesPrecioProps> = ({ precio, moneda, wp }) =
           </>
         )}
       </Typography>
-      <BotonConsultar paquete={wp} />
+      <Box
+  onClick={(e) => e.stopPropagation()}
+  sx={{
+    width: "100%",
+    display: "flex",
+    justifyContent: "center", // o "flex-start" / "flex-end" según tu diseño
+    alignItems: "center",
+    mt: 1, // margen opcional
+  }}
+>
+        <BotonConsultar paquete={wp} />
+      </Box>
     </Box>
   );
 };
