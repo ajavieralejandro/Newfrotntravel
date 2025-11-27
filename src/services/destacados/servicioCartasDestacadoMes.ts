@@ -1,24 +1,39 @@
-import axios from "axios";
-import { PaqueteData,HotelDetalle } from "../../interfaces/PaqueteData";
-import type { ApiResponse } from "../../interfaces/ApiResponse";
+// src/services/paquetes/paquetesDestacadosService.ts
 
+import { PaqueteData } from "../../interfaces/PaqueteData";
+
+/** Estructura de la respuesta que devuelve tu endpoint Laravel */
 interface RespuestaPaginada {
   current_page: number;
   last_page: number;
   total: number;
+  per_page: number;
   data: PaqueteData[];
+  // otros campos que no usamos ahora:
+  // from?: number;
+  // to?: number;
+  // path?: string;
+  // condiciones?: any;
+  // atlas_diag?: any;
 }
 
+/** URL base de tu backend */
+const API_BASE = "https://travelconnect.com.ar";
+
 /**
- * Obtiene paquetes destacados paginados desde el backend.
- * @param page Número de página (default: 1)
- * @param perPage Cantidad por página (default: 8)
- * @param idAgencia ID de la agencia (opcional)
+ * Obtiene paquetes destacados paginados desde el backend Laravel.
+ * Usa el endpoint /paquetes-paginados que ya mezcla:
+ *   - paquetes propios de la agencia
+ *   - paquetes externos (Atlas / AllSeasons) importados y persistidos
+ *
+ * @param page      Número de página (default: 1)
+ * @param perPage   Cantidad por página (default: 9)
+ * @param idAgencia ID de la agencia (opcional, pero recomendado)
  */
 export const obtenerPaquetesDestacadosPaginados = async (
-  page: number = 0,
+  page: number = 1,
   perPage: number = 9,
-  idAgencia?: number // ✅ ID debe ser tipo number
+  idAgencia?: number
 ): Promise<{
   paquetes: PaqueteData[];
   paginaActual: number;
@@ -26,102 +41,39 @@ export const obtenerPaquetesDestacadosPaginados = async (
   total: number;
 }> => {
   try {
+    // Armamos los query params
     const params = new URLSearchParams();
-    params.append("page", page.toString());
-    params.append("per_page", perPage.toString());
+    params.append("page", String(page));
+    params.append("per_page", String(perPage));
 
-    // ✅ Campo correcto según el backend: "id"
+    // El backend espera "id" como ID de la agencia
     if (idAgencia !== undefined) {
-      params.append("id", idAgencia.toString());
+      params.append("id", String(idAgencia));
     }
 
-   // const response = await axios.get<RespuestaPaginada>(
-   //   `https://travelconnect.com.ar/tgx/search?country=&city=&check_in=&check_out=&ages=&client=travelspirit&access=32146&page=1&per_page=20`,
-   //   {
-   //     headers: {
-   //       Accept: "application/json",
-   //     },
-   //   }
-   // );
-    const response = await fetch(`https://travelconnect.com.ar/tgx/search?country=&city=&check_in=&check_out=&ages=&client=travelspirit&access=32146&page=${page.toString()}&per_page=${perPage.toString()}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
-        
-      });
+    const url = `${API_BASE}/paquetes-paginados?${params.toString()}`;
 
-     const rawData = await response.json();
-    const apiResp = rawData as ApiResponse;
-    var paquetes: PaqueteData[] = [];
-         // ✅ Mapeamos cada hotel a un PaqueteData
-         paquetes  = (apiResp.options ?? []).map((o, index) => {
-  // Buscamos el hotel correspondiente
-  const hotelMatch = apiResp.hotels?.find(h => h.hotelCode === o.hotelCode);
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
 
-  const hotelDetalle: HotelDetalle = {
-    hotelName: o.hotelName ?? "Sin nombre",
-    hotelCode: o.hotelCode ?? "",
-    price: {
-      gross: o.price?.gross ?? 0,
-      currency: o.price?.currency ?? "USD",
-    },
-    roomCode: o.rooms?.[0]?.code ?? undefined,
-    roomDescription: o.rooms?.[0]?.description ?? undefined,
-    boardCode: o.boardCode ?? undefined,
-    cancelPolicy: { refundable: o.cancelPolicy?.refundable ?? false },
-    imageUrl:
-      hotelMatch?.medias?.map(m => m.url) ??
-      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
 
-    // ✅ NUEVO: agregamos location correctamente
-    location: hotelMatch
-      ? {
-          address: hotelMatch.location?.address ?? "",
-          city: hotelMatch.location?.city ?? "",
-          country: hotelMatch.location?.country ?? "",
-          coordinates: {
-            latitude: Number(hotelMatch.location?.coordinates?.latitude ?? 0),
-            longitude: Number(hotelMatch.location?.coordinates?.longitude ?? 0),
-          },
-        }
-      : undefined,
-  };
+    const raw = await response.json();
+    const data = raw as RespuestaPaginada;
 
-  return {
-    id: index + 1,
-    titulo: hotelDetalle.hotelName,
-    descripcion: `Alojamiento en ${hotelDetalle.hotelName}`,
-    pais: hotelDetalle.location?.country ?? "",
-    ciudad: hotelDetalle.location?.city ?? "",
-    ciudad_iata: null,
-    fecha_vigencia_desde: "01-11-2025",
-    fecha_vigencia_hasta: "30-11-2025",
-    cant_noches: 1,
-    tipo_producto: "hotel",
-    activo: true,
-    prioridad: "media",
-    imagen_principal:
-      hotelDetalle.imageUrl?.[0] ??
-      "https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible",
-    edad_menores: 12,
-    transporte: null,
-    tipo_moneda: hotelDetalle.price.currency,
-    descuento: "0",
-    componentes: null,
-    hotel: null,
-    hotelDetalle: [hotelDetalle],
-    galeria_imagenes:
-      hotelDetalle.imageUrl ??
-      ["https://dummyimage.com/400x300/e0e0e0/555555.png&text=Sin+imagen+disponible"],
-    salidas: [],
-  };
-});
-
+    const paquetes: PaqueteData[] = data.data ?? [];
 
     return {
-      paquetes: paquetes,
-      paginaActual: apiResp.meta.pagination.page,
-      ultimaPagina: apiResp.meta.pagination.total_pages,
-      total: apiResp.meta.pagination.total,
+      paquetes,
+      paginaActual: Number(data.current_page ?? 1),
+      ultimaPagina: Number(data.last_page ?? 1),
+      total: Number(data.total ?? paquetes.length),
     };
   } catch (error) {
     console.error("Error al obtener paquetes paginados:", error);
