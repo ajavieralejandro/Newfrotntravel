@@ -1,11 +1,10 @@
 // components/MapaFooter.tsx
-import React, { useMemo } from "react";
+import React, { useEffect, useRef } from "react";
 import { Box, Typography } from "@mui/material";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-// Si usás Vite, esto funciona perfecto y evita depender de CDN:
+// Si usás Vite, podés importar las imágenes locales:
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -16,32 +15,57 @@ interface MapaFooterProps {
   direccion?: string;
 }
 
-// Configuramos el ícono por defecto de Leaflet
-const defaultIcon = L.icon({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = defaultIcon;
-
 const MapaFooter: React.FC<MapaFooterProps> = ({
   latitud,
   longitud,
   direccion,
 }) => {
-  const center = useMemo<[number, number]>(() => {
-    const lat = latitud ?? -34.59191;
-    const lng = longitud ?? -58.37699;
-    return [lat, lng];
-  }, [latitud, longitud]);
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
+  const lat = latitud ?? -34.59191;
+  const lng = longitud ?? -58.37699;
   const direccionFinal =
     direccion || "Av. del Libertador 218, 1º Piso, CABA, Argentina";
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // si ya está creado, no lo recreamos
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([lat, lng], 16);
+      return;
+    }
+
+    // Configuramos ícono por defecto
+    const defaultIcon = L.icon({
+      iconRetinaUrl: markerIcon2x,
+      iconUrl: markerIcon,
+      shadowUrl: markerShadow,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41],
+    });
+
+    const map = L.map(mapRef.current).setView([lat, lng], 16);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const marker = L.marker([lat, lng], { icon: defaultIcon }).addTo(map);
+    marker.bindPopup(`📍 ${direccionFinal}`);
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [lat, lng, direccionFinal]);
 
   return (
     <Box sx={{ mt: 2, width: "100%" }}>
@@ -55,35 +79,16 @@ const MapaFooter: React.FC<MapaFooterProps> = ({
       </Typography>
 
       <Box
+        ref={mapRef}
         sx={{
           width: "100%",
           height: 150,
           borderRadius: "10px",
           overflow: "hidden",
-          "& .leaflet-container": {
-            width: "100%",
-            height: "100%",
-          },
+          // fondo mientras carga
+          bgcolor: "grey.900",
         }}
-      >
-        <MapContainer
-          center={center}
-          zoom={16}
-          scrollWheelZoom={false}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          />
-          <Marker position={center}>
-            <Popup>📍 {direccionFinal}</Popup>
-          </Marker>
-        </MapContainer>
-      </Box>
+      />
     </Box>
   );
 };
