@@ -50,15 +50,15 @@ const ContenedorCartasMes: React.FC = () => {
         idAgencia
       );
 
-      // Soporta Axios (respuesta.data) o JSON directo (respuesta)
+      // ✅ Soporta Axios (respuesta.data) o JSON directo (respuesta)
       const payload: any = (respuesta as any)?.data ?? respuesta;
 
-      // Soporta payload.paquetes o payload.data
+      // ✅ Soporta payload.paquetes o payload.data
       const nuevos: PaqueteData[] = (payload?.paquetes ??
         payload?.data ??
         []) as PaqueteData[];
 
-      // Soporta payload.paginaActual/ultimaPagina o payload.pagination.*
+      // ✅ Soporta payload.paginaActual/ultimaPagina o payload.pagination.*
       const pagActual = Number(
         payload?.paginaActual ?? payload?.pagination?.current_page ?? 1
       );
@@ -66,12 +66,16 @@ const ContenedorCartasMes: React.FC = () => {
         payload?.ultimaPagina ?? payload?.pagination?.last_page ?? 1
       );
 
+      console.log("📦 Backend payload:", payload);
+      console.log("📦 nuevos paquetes:", nuevos?.length, nuevos);
+      console.log("📄 pagActual:", pagActual, "ultPag:", ultPag);
+
       setPaquetes((prev) =>
         paginaAObtener === 1 ? nuevos : [...prev, ...nuevos]
       );
 
-      setPagina(Number.isFinite(pagActual) && pagActual > 0 ? pagActual : 1);
-      setUltimaPagina(Number.isFinite(ultPag) && ultPag > 0 ? ultPag : 1);
+      setPagina(pagActual);
+      setUltimaPagina(ultPag);
     } catch (error) {
       console.error("❌ Error cargando paquetes destacados:", error);
     } finally {
@@ -165,6 +169,7 @@ const ContenedorCartasMes: React.FC = () => {
             ))}
           </Grid>
 
+          {/* ✅ botón ver más */}
           {pagina < ultimaPagina && (
             <Button
               variant="contained"
