@@ -97,6 +97,10 @@ interface CartaMesProps {
 }
 
 const CartaMes: React.FC<CartaMesProps> = ({ paquete }) => {
+  console.log("CartaMesImagen", CartaMesImagen, typeof CartaMesImagen);
+console.log("CartaMesContenido", CartaMesContenido, typeof CartaMesContenido);
+console.log("CartaMesPrecio", CartaMesPrecio, typeof CartaMesPrecio);
+
   const tarjetas = useTarjetas();
   const datosGenerales = useDatosGenerales();
   const navigate = useNavigate();
