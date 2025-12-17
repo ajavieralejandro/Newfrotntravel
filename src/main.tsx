@@ -48,20 +48,44 @@ window.addEventListener("unhandledrejection", (e: PromiseRejectionEvent) => {
 // Parchea createElement para detectar tipos inválidos (undefined/objeto)
 (function patchCreateElementForDebug() {
   const orig = (React as any).createElement;
+  
   (React as any).createElement = function (type: any, props: any, ...children: any[]) {
     const isValid =
       typeof type === "string" ||
       typeof type === "function" ||
-      (type && typeof type === "object" && (type as any).$$typeof);
+      (type && typeof type === "object" && (type as any).$$typeof === Symbol.for('react.element'));
+    
     if (!isValid) {
-      console.error("[React] Tipo de elemento inválido:", { type, props });
-      try {
-        throw new Error("Elemento React inválido (type no es función/componente)");
-      } catch (e) {
-        console.error(e);
+      console.error("[React] Tipo de elemento inválido:", { 
+        type, 
+        typeOf: typeof type,
+        isReactElement: type && typeof type === 'object' && type.$$typeof
+      });
+      
+      // Crear un mensaje de error más útil
+      let errorMessage = "Elemento React inválido (type no es función/componente)";
+      if (type === undefined) {
+        errorMessage = "Elemento React es undefined - probablemente importación fallida";
+      } else if (type === null) {
+        errorMessage = "Elemento React es null";
+      } else if (typeof type === 'object') {
+        errorMessage = "Elemento React es un objeto pero no es un componente React válido";
       }
+      
+      console.error(errorMessage);
+      
+      // Podemos retornar un elemento de fallback para evitar romper la UI completamente
+      return orig.call(this, 'div', { 
+        style: { 
+          border: '2px solid red', 
+          padding: '10px', 
+          backgroundColor: '#fee' 
+        } 
+      }, `ERROR: ${errorMessage}`);
     }
-    return orig.apply(this, [type, props, ...children]);
+    
+    // Llamar a la función original con todos los argumentos
+    return orig.call(this, type, props, ...children);
   };
 })();
 /** ---------- /Debug helpers ---------- */

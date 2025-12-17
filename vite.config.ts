@@ -4,9 +4,12 @@ import path from "node:path";
 
 export default defineConfig({
   plugins: [react()],
-  resolve: { /* tus alias */ },
+  resolve: {
+    // tus alias
+  },
 
   build: {
+    sourcemap: true,           // ✅ clave para saber “dónde es”
     manifest: true,
     outDir: path.resolve(__dirname, "../../../../public/build-newfrotntravel"),
     emptyOutDir: true,
