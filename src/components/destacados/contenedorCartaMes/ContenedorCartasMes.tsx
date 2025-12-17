@@ -32,6 +32,8 @@ const ContenedorCartasMes: React.FC = () => {
   const [paquetes, setPaquetes] = useState<PaqueteData[]>([]);
   const [pagina, setPagina] = useState<number>(1);
   const [ultimaPagina, setUltimaPagina] = useState<number>(1);
+  const [total, setTotal] = useState<number>(0);
+
   const [cargando, setCargando] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,38 +78,20 @@ const ContenedorCartasMes: React.FC = () => {
 
         const payload: any = (respuesta as any)?.data ?? respuesta;
 
-        // Tu API devuelve ambos: payload.data y payload.paquetes, elegimos uno
+        // Tu API trae data (y también paquetes). Elegimos el que exista.
         const nuevos: PaqueteData[] = (payload?.data ??
           payload?.paquetes ??
           []) as PaqueteData[];
 
-        // ✅ TU payload trae paginaActual / ultimaPagina (los usamos directo)
-        const pagActualRaw =
-          payload?.paginaActual ?? payload?.pagination?.current_page ?? paginaAObtener;
-        const ultPagRaw =
-          payload?.ultimaPagina ?? payload?.pagination?.last_page ?? 1;
+        // ✅ Los campos que TU payload garantiza
+        const pagActual = Number(payload?.paginaActual ?? payload?.pagination?.current_page ?? paginaAObtener);
+        const ultPag = Number(payload?.ultimaPagina ?? payload?.pagination?.last_page ?? 1);
+        const tot = Number(payload?.total ?? payload?.pagination?.total ?? 0);
 
-        const pagActual = parseInt(String(pagActualRaw), 10);
-        const ultPag = parseInt(String(ultPagRaw), 10);
-
-        setPaquetes((prev) =>
-          paginaAObtener === 1 ? nuevos : [...prev, ...nuevos]
-        );
-
+        setPaquetes((prev) => (paginaAObtener === 1 ? nuevos : [...prev, ...nuevos]));
         setPagina(Number.isFinite(pagActual) && pagActual > 0 ? pagActual : paginaAObtener);
         setUltimaPagina(Number.isFinite(ultPag) && ultPag > 0 ? ultPag : 1);
-
-        // DEBUG útil (podés borrar luego)
-        console.log("[PAGINADO payload]", {
-          paginaAObtener,
-          pagActualRaw,
-          ultPagRaw,
-          pagActual,
-          ultPag,
-          perPage,
-          recibidos: nuevos.length,
-          total: payload?.total ?? payload?.pagination?.total,
-        });
+        setTotal(Number.isFinite(tot) && tot >= 0 ? tot : 0);
       } catch (e: any) {
         console.error("❌ Error cargando paquetes destacados:", e);
         setError(e?.message ?? "Error cargando paquetes destacados");
@@ -122,51 +106,25 @@ const ContenedorCartasMes: React.FC = () => {
     setPaquetes([]);
     setPagina(1);
     setUltimaPagina(1);
+    setTotal(0);
 
     cargarPagina(1);
   }, [cargarPagina]);
 
-  // Debug de estado (borrable)
-  console.log("[PAGINADO state]", { pagina, ultimaPagina, cargando, paquetes: paquetes.length });
-
   if (!datosGenerales) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: 300,
-        }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
         <CircularProgress />
-        <Typography sx={{ mt: 2 }}>
-          Cargando configuración de agencia...
-        </Typography>
+        <Typography sx={{ mt: 2 }}>Cargando configuración de agencia...</Typography>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box
-        sx={{
-          p: 3,
-          textAlign: "center",
-          maxWidth: 600,
-          mx: "auto",
-          mt: 4,
-          border: "1px solid #f0c",
-          borderRadius: 2,
-        }}
-      >
-        <Typography variant="h6" gutterBottom>
-          ⚠️ Error
-        </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-          {error}
-        </Typography>
+      <Box sx={{ p: 3, textAlign: "center", maxWidth: 600, mx: "auto", mt: 4, border: "1px solid #f0c", borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom>⚠️ Error</Typography>
+        <Typography variant="body2" sx={{ opacity: 0.8 }}>{error}</Typography>
         <Button sx={{ mt: 2 }} variant="outlined" onClick={() => cargarPagina(1)}>
           Reintentar
         </Button>
@@ -174,7 +132,8 @@ const ContenedorCartasMes: React.FC = () => {
     );
   }
 
-  const mostrarVerMas = pagina < ultimaPagina;
+  // ✅ FIX: Ver más depende de TOTAL (no de ultimaPagina)
+  const mostrarVerMas = total > 0 ? paquetes.length < total : pagina < ultimaPagina;
 
   return (
     <Box
@@ -184,15 +143,9 @@ const ContenedorCartasMes: React.FC = () => {
         alignItems: "center",
         gap: { xs: 2, sm: 3, md: 4 },
         width: "100%",
-        maxWidth: {
-          xs: "100%",
-          sm: "95%",
-          md: "95%",
-          lg: "1400px",
-          xl: "1600px",
-        },
+        maxWidth: { xs: "100%", sm: "95%", md: "95%", lg: "1400px", xl: "1600px" },
         margin: "0 auto",
-        overflow: "hidden",
+        overflow: "visible", // 👈 importante por si algún padre te lo estaba “cortando”
         backgroundColor: "transparent",
         px: { xs: 0, sm: 0, md: 0 },
       }}
@@ -206,13 +159,7 @@ const ContenedorCartasMes: React.FC = () => {
             alignItems="stretch"
             sx={{
               width: "100%",
-              maxWidth: {
-                xs: "100%",
-                sm: "95%",
-                md: "95%",
-                lg: "1200px",
-                xl: "1450px",
-              },
+              maxWidth: { xs: "100%", sm: "95%", md: "95%", lg: "1200px", xl: "1450px" },
               margin: "0 auto",
               px: 0,
               mx: 0,
@@ -237,15 +184,6 @@ const ContenedorCartasMes: React.FC = () => {
                     display: "flex",
                     flexDirection: "column",
                   },
-                  opacity: 0,
-                  transform: "translateY(20px)",
-                  animation: "fadeInUp 0.5s ease-out forwards",
-                  animationDelay: `${index * 100}ms`,
-                  "@keyframes fadeInUp": {
-                    "0%": { opacity: 0, transform: "translateY(20px)" },
-                    "100%": { opacity: 1, transform: "translateY(0)" },
-                  },
-                  px: 0,
                 }}
               >
                 <CartaMes paquete={paquete} />
@@ -264,67 +202,32 @@ const ContenedorCartasMes: React.FC = () => {
                 backgroundColor: tarjetaColorPrimario,
                 color: tarjetaTipografiaColor,
                 "& .MuiTypography-root, & svg": { color: "inherit" },
-                "&:hover": {
-                  backgroundColor: tarjetaTipografiaColor,
-                  color: tarjetaColorPrimario,
-                },
+                "&:hover": { backgroundColor: tarjetaTipografiaColor, color: tarjetaColorPrimario },
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
               }}
             >
-              <Typography
-                variant="button"
-                sx={{
-                  fontFamily: tarjetaTipografia,
-                  color: "inherit",
-                  fontWeight: 600,
-                }}
-              >
+              <Typography variant="button" sx={{ fontFamily: tarjetaTipografia, color: "inherit", fontWeight: 600 }}>
                 {cargando ? "Cargando..." : "Ver más"}
               </Typography>
               {!cargando && <ExpandMoreIcon sx={{ color: "inherit" }} />}
             </Button>
           )}
 
-          {cargando && pagina === 1 && (
-            <Box
-              sx={{
-                mt: 4,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 80,
-              }}
-            >
+          {cargando && (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "center", alignItems: "center", minHeight: 60 }}>
               <CircularProgress sx={{ color: tarjetaColorPrimario }} />
             </Box>
           )}
         </>
       ) : cargando ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: 300,
-          }}
-        >
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
           <CircularProgress sx={{ color: tarjetaColorPrimario }} />
           <Typography sx={{ mt: 2 }}>Cargando paquetes destacados...</Typography>
         </Box>
       ) : (
-        <Box
-          sx={{
-            textAlign: "center",
-            mt: 4,
-            p: 3,
-            border: "1px solid #e0e0e0",
-            borderRadius: 2,
-            maxWidth: 500,
-          }}
-        >
+        <Box sx={{ textAlign: "center", mt: 4, p: 3, border: "1px solid #e0e0e0", borderRadius: 2, maxWidth: 500 }}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No hay paquetes destacados
           </Typography>
