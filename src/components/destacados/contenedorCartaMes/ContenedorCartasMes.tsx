@@ -10,37 +10,75 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CartaMes from "../contenedorCartaMes/CartaMes";
-import {
-  useDatosGenerales,
-  useTarjetas,
+
+// VERIFICA QUE ESTAS IMPORTACIONES EXISTAN EN TU PROYECTO
+import { 
+  useDatosGenerales, 
+  useTarjetas 
 } from "../../../contextos/agencia/DatosAgenciaContext";
+
 import { obtenerPaquetesDestacadosPaginados } from "../../../services/destacados/servicioCartasDestacadoMes";
 import { PaqueteData } from "../../../interfaces/PaqueteData";
 
 const ContenedorCartasMes: React.FC = () => {
-  const tarjetas = useTarjetas();
-  const datosGenerales = useDatosGenerales();
+  // Agrega logs para debug
+  console.log("[DEBUG] Intentando cargar contexto...");
+  
+  let tarjetas, datosGenerales;
+  
+  try {
+    tarjetas = useTarjetas();
+    datosGenerales = useDatosGenerales();
+    console.log("[DEBUG] Contexto cargado exitosamente:", { 
+      tieneDatosGenerales: !!datosGenerales,
+      tieneTarjetas: !!tarjetas,
+      datosGeneralesKeys: datosGenerales ? Object.keys(datosGenerales) : [],
+      tarjetasKeys: tarjetas ? Object.keys(tarjetas) : []
+    });
+  } catch (error) {
+    console.error("[DEBUG] Error crítico cargando contexto:", error);
+    console.error("[DEBUG] Stack trace:", error.stack);
+    // Valores por defecto si el contexto falla
+    tarjetas = null;
+    datosGenerales = null;
+  }
 
   const [paquetes, setPaquetes] = useState<PaqueteData[]>([]);
   const [pagina, setPagina] = useState(1);
   const [ultimaPagina, setUltimaPagina] = useState(1);
   const [cargando, setCargando] = useState(false);
+  const [errorContexto, setErrorContexto] = useState<string | null>(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const perPage = isMobile ? 4 : 8;
 
+  // Verifica que los datos del contexto estén disponibles
   const idAgencia = datosGenerales?.idAgencia;
 
   useEffect(() => {
-    if (idAgencia) {
-      cargarPagina(1);
+    console.log("[DEBUG] useEffect ejecutándose, idAgencia:", idAgencia);
+    
+    // Si no hay contexto, mostrar error
+    if (!datosGenerales) {
+      setErrorContexto("Contexto de agencia no disponible. Verifica que DatosAgenciaProvider esté configurado correctamente.");
+      console.error("[DEBUG] datosGenerales es:", datosGenerales);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perPage, idAgencia]);
+
+    if (idAgencia) {
+      console.log("[DEBUG] Cargando página 1 con idAgencia:", idAgencia);
+      cargarPagina(1);
+    } else {
+      console.warn("[DEBUG] idAgencia no disponible:", idAgencia);
+    }
+  }, [perPage, idAgencia, datosGenerales, tarjetas]);
 
   const cargarPagina = async (paginaAObtener: number) => {
-    if (!idAgencia) return;
+    if (!idAgencia) {
+      console.warn("No hay idAgencia para cargar paquetes");
+      return;
+    }
 
     setCargando(true);
     try {
@@ -72,6 +110,8 @@ const ContenedorCartasMes: React.FC = () => {
 
       setPagina(Number.isFinite(pagActual) && pagActual > 0 ? pagActual : 1);
       setUltimaPagina(Number.isFinite(ultPag) && ultPag > 0 ? ultPag : 1);
+      
+      console.log(`[DEBUG] Página ${paginaAObtener} cargada:`, nuevos.length, "paquetes");
     } catch (error) {
       console.error("❌ Error cargando paquetes destacados:", error);
     } finally {
@@ -79,26 +119,75 @@ const ContenedorCartasMes: React.FC = () => {
     }
   };
 
-  if (!datosGenerales) {
+  // Muestra error si hay problema con el contexto
+  if (errorContexto) {
     return (
-      <Typography sx={{ textAlign: "center", mt: 4 }}>
-        Cargando estilos...
-      </Typography>
+      <Box sx={{ 
+        p: 3, 
+        textAlign: "center",
+        border: "2px solid #ff6b6b",
+        borderRadius: 1,
+        bgcolor: "#fff5f5",
+        maxWidth: 600,
+        mx: "auto",
+        mt: 4 
+      }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          ⚠️ Error de Contexto
+        </Typography>
+        <Typography variant="body1" paragraph>
+          {errorContexto}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Verifica que:
+        </Typography>
+        <ul style={{ textAlign: "left", color: "text.secondary", fontSize: "0.875rem" }}>
+          <li>El componente esté dentro de {"<DatosAgenciaProvider>"}</li>
+          <li>Los hooks useDatosGenerales y useTarjetas estén correctamente exportados</li>
+          <li>El archivo DatosAgenciaContext.ts exista en la ruta especificada</li>
+        </ul>
+      </Box>
     );
   }
 
-  const tarjetaTipografia =
+  if (!datosGenerales) {
+    return (
+      <Box sx={{ 
+        display: "flex", 
+        flexDirection: "column",
+        justifyContent: "center", 
+        alignItems: "center", 
+        minHeight: 300 
+      }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Cargando configuración de agencia...</Typography>
+      </Box>
+    );
+  }
+
+  // Valores por defecto robustos - CORREGIDO (sin .tipografia que no existe)
+  const tarjetaTipografia = 
     tarjetas?.tipografia ||
-    datosGenerales.tipografiaAgencia ||
+    datosGenerales.tipografiaAgencia ||  // Solo esta propiedad, no .tipografia
     "'Poppins', sans-serif";
 
-  const tarjetaTipografiaColor =
+  const tarjetaTipografiaColor = 
     tarjetas?.tipografiaColor ||
-    datosGenerales.colorTipografiaAgencia ||
+    datosGenerales.colorTipografiaAgencia ||  // Solo esta propiedad
     "#FFFFFF";
 
-  const tarjetaColorPrimario =
-    tarjetas?.color?.primario || datosGenerales.color?.primario || "#CCCCCC";
+  const tarjetaColorPrimario = 
+    tarjetas?.color?.primario || 
+    datosGenerales.color?.primario || 
+    "#CCCCCC";
+
+  console.log("[DEBUG] Valores finales:", {
+    tarjetaTipografia,
+    tarjetaTipografiaColor,
+    tarjetaColorPrimario,
+    idAgencia,
+    totalPaquetes: paquetes.length
+  });
 
   return (
     <Box
@@ -137,7 +226,7 @@ const ContenedorCartasMes: React.FC = () => {
                 sm={6}
                 md={4}
                 lg={3}
-                key={paquete.id}
+                key={paquete.id || `paquete-${index}`}
                 sx={{
                   display: "flex",
                   alignItems: "stretch",
@@ -198,15 +287,19 @@ const ContenedorCartasMes: React.FC = () => {
             >
               <Typography
                 variant="button"
-                sx={{ fontFamily: tarjetaTipografia, color: "inherit" }}
+                sx={{ 
+                  fontFamily: tarjetaTipografia, 
+                  color: "inherit",
+                  fontWeight: 600 
+                }}
               >
-                Ver más
+                {cargando ? "Cargando..." : "Ver más"}
               </Typography>
-              <ExpandMoreIcon sx={{ color: "inherit" }} />
+              {!cargando && <ExpandMoreIcon sx={{ color: "inherit" }} />}
             </Button>
           )}
 
-          {cargando && (
+          {cargando && pagina === 1 && (
             <Box
               sx={{
                 mt: 4,
@@ -220,10 +313,33 @@ const ContenedorCartasMes: React.FC = () => {
             </Box>
           )}
         </>
+      ) : !cargando ? (
+        <Box sx={{ 
+          textAlign: "center", 
+          mt: 4,
+          p: 3,
+          border: "1px solid #e0e0e0",
+          borderRadius: 2,
+          maxWidth: 500
+        }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No hay paquetes destacados
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            No se encontraron paquetes destacados para mostrar.
+          </Typography>
+        </Box>
       ) : (
-        <Typography sx={{ textAlign: "center", mt: 4 }}>
-          {cargando ? "Cargando paquetes..." : "No hay paquetes disponibles."}
-        </Typography>
+        <Box sx={{ 
+          display: "flex", 
+          flexDirection: "column",
+          justifyContent: "center", 
+          alignItems: "center", 
+          minHeight: 300 
+        }}>
+          <CircularProgress sx={{ color: tarjetaColorPrimario }} />
+          <Typography sx={{ mt: 2 }}>Cargando paquetes destacados...</Typography>
+        </Box>
       )}
     </Box>
   );
